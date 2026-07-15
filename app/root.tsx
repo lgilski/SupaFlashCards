@@ -9,7 +9,6 @@ import {
 
 import type { Route } from './+types/root';
 import './app.css';
-import { ApolloHydrationHelper } from '@apollo/client-integration-react-router';
 
 export const links: Route.LinksFunction = () => [
   { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
@@ -34,9 +33,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Links />
       </head>
       <body>
-        {/* <ApolloHydrationHelper> */}
         {children}
-        {/* </ApolloHydrationHelper> */}
         <ScrollRestoration />
         <Scripts />
       </body>

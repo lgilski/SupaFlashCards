@@ -3,7 +3,7 @@ import type { Route } from './+types/home';
 import { cardsData } from '~/data';
 import { Link } from 'react-router';
 
-import { createClient } from '@supabase/supabase-js';
+import { supabase } from '~/supabase';
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -12,18 +12,14 @@ export function meta({}: Route.MetaArgs) {
   ];
 }
 
-const supabase = createClient(
-  import.meta.env.VITE_SUPABASE_URL,
-  import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
-);
-
 export async function loader() {
-  // tutaj z serwera
+  const { data, error } = await supabase.from('categories').select();
 
-  const { data, error } = await supabase.from('instruments').select();
+  if (error) {
+    console.error(error);
+  }
 
   return data;
-  // return cardsData;
 }
 
 export default function Home({ loaderData }: Route.ComponentProps) {
@@ -33,11 +29,12 @@ export default function Home({ loaderData }: Route.ComponentProps) {
 
   return (
     <section className='inline-flex flex-col mt-16 gap-1'>
-      {/* {flashCards.map(el => (
+      <Link to={'/flash-cards/create'}>Crate flash cards</Link>
+      {flashCards?.map(el => (
         <Link className='' key={el.name} to={`flash-cards/${el.name}`}>
           {el.name}
         </Link>
-      ))} */}
+      ))}
     </section>
   );
 }
