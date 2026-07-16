@@ -1,9 +1,79 @@
 @import 'tailwindcss';
 
+@theme {
+  --color-teal-050: #effcf6;
+  --color-teal-100: #c6f7e2;
+  --color-teal-200: #8eedc7;
+  --color-teal-300: #65d6ad;
+  --color-teal-400: #3ebd93;
+  --color-teal-500: #27ab83;
+  --color-teal-600: #199473;
+  --color-teal-700: #147d64;
+  --color-teal-800: #0c6b58;
+  --color-teal-900: #014d40;
+
+  /* // Neutrals */
+  --color-blue-grey-050: #f0f4f8;
+  --color-blue-grey-100: #d9e2ec;
+  --color-blue-grey-200: #bcccdc;
+  --color-blue-grey-300: #9fb3c8;
+  --color-blue-grey-400: #829ab1;
+  --color-blue-grey-500: #627d98;
+  --color-blue-grey-600: #486581;
+  --color-blue-grey-700: #334e68;
+  --color-blue-grey-800: #243b53;
+  --color-blue-grey-900: #102a43;
+
+  /* // Supporting */
+  --color-blue-050: #dceefb;
+  --color-blue-100: #b6e0fe;
+  --color-blue-200: #84c5f4;
+  --color-blue-300: #62b0e8;
+  --color-blue-400: #4098d7;
+  --color-blue-500: #2680c2;
+  --color-blue-600: #186faf;
+  --color-blue-700: #0f609b;
+  --color-blue-800: #0a558c;
+  --color-blue-900: #003e6b;
+
+  --color-purple-050: #eae2f8;
+  --color-purple-100: #cfbcf2;
+  --color-purple-200: #a081d9;
+  --color-purple-300: #8662c7;
+  --color-purple-400: #724bb7;
+  --color-purple-500: #653cad;
+  --color-purple-600: #51279b;
+  --color-purple-700: #421987;
+  --color-purple-800: #34126f;
+  --color-purple-900: #240754;
+
+  --color-red-050: #ffeeee;
+  --color-red-100: #facdcd;
+  --color-red-200: #f29b9b;
+  --color-red-300: #e66a6a;
+  --color-red-400: #d64545;
+  --color-red-500: #ba2525;
+  --color-red-600: #a61b1b;
+  --color-red-700: #911111;
+  --color-red-800: #780a0a;
+  --color-red-900: #610404;
+
+  --color-yellow-050: #fffaeb;
+  --color-yellow-100: #fcefc7;
+  --color-yellow-200: #f8e3a3;
+  --color-yellow-300: #f9da8b;
+  --color-yellow-400: #f7d070;
+  --color-yellow-500: #e9b949;
+  --color-yellow-600: #c99a2e;
+  --color-yellow-700: #a27c1a;
+  --color-yellow-800: #7c5e10;
+  --color-yellow-900: #513c06;
+}
+
 html,
 body {
   box-sizing: border-box;
 
-  background-color: #555;
-  color: #f1f1f1;
+  /* background-color: #555;
+  color: #f1f1f1; */
 }

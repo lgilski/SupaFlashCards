@@ -9,14 +9,25 @@ export async function loader({ params }: Route.LoaderArgs) {
     throw new Response('Not Found', { status: 404 });
   }
 
-  // const cards = cardsData.find(el => el.name === params.id);
+  const { data, error } = await supabase
+    .from('categories')
+    .select(
+      `
+    name,
+    data:cards (
+      question,
+      answer
+    )
+  `,
+    )
+    .eq('name', params.id)
+    .single();
 
-  // const { data, error } = await supabase
-  //   .from('flash-cards')
-  //   .select()
-  //   .eq('title', params.id);
+  if (!data) {
+    throw new Response('There is no data', { status: 404 });
+  }
 
-  // return data[0].data.length < 1 ? data[0].data : JSON.parse(data[0].data);
+  return data.data;
 }
 
 export default function FlashCards({ loaderData }: Route.ComponentProps) {
@@ -24,9 +35,7 @@ export default function FlashCards({ loaderData }: Route.ComponentProps) {
   const [showAnswer, setShowAnswer] = useState(false);
   const [currentCard, setCurrentCard] = useState(0);
 
-  console.log(data);
-
-  if (!data[0].question || !data[0].answer)
+  if (data.length < 1)
     return (
       <section>
         <div>Brak danych...</div>
@@ -56,22 +65,40 @@ export default function FlashCards({ loaderData }: Route.ComponentProps) {
         <button type='submit'>Edit</button>
       </Form>
       <div
-        className='flex justify-center items-center text-5xl text-center bg-amber-800 rounded-xl w-3xl h-96 p-2'
+        className={`flex justify-center items-center text-5xl text-center rounded-xl w-3xl h-96 p-2 bg-teal-050 border border-teal-700 text-teal-900`}
         onClick={() => setShowAnswer(prevState => !prevState)}
       >
-        {!showAnswer
-          ? data[currentCard].question
-          : `Odpowiedź: ${data[currentCard].answer}`}
+        {showAnswer
+          ? `Odpowiedź: ${data[currentCard].answer}`
+          : data[currentCard].question}
       </div>
       <div>
         {currentCard + 1}/{data.length} cards
       </div>
-      <div className='flex gap-8'>
-        <button className='bg-amber-600' onClick={previouseQuestion}>
-          Previouse question
+      <div className='grid grid-cols-4 gap-8'>
+        <button
+          className='bg-teal-600 text-teal-100 px-4 py-2 rounded-xl'
+          onClick={previouseQuestion}
+        >
+          Previouse
         </button>
-        <button className='bg-amber-600' onClick={nextQuestion}>
-          Next question
+        <button
+          className='bg-blue-grey-600 text-blue-grey-100 px-4 py-2 rounded-xl'
+          // onClick={nextQuestion}
+        >
+          Done
+        </button>
+        <button
+          className='bg-yellow-600 text-yellow-100 px-4 py-2 rounded-xl'
+          // onClick={nextQuestion}
+        >
+          Repeat
+        </button>
+        <button
+          className='bg-teal-600 text-teal-100 px-4 py-2 rounded-xl'
+          onClick={nextQuestion}
+        >
+          Next
         </button>
       </div>
     </section>

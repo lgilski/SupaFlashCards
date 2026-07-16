@@ -1,6 +1,4 @@
-import { useState } from 'react';
 import type { Route } from './+types/home';
-import { cardsData } from '~/data';
 import { Link } from 'react-router';
 
 import { supabase } from '~/supabase';
@@ -25,13 +23,14 @@ export async function loader() {
 export default function Home({ loaderData }: Route.ComponentProps) {
   const flashCards = loaderData;
 
-  console.log(flashCards);
-
   return (
-    <section className='inline-flex flex-col mt-16 gap-1'>
-      <Link to={'/flash-cards/create'}>Crate flash cards</Link>
+    <section className='grid grid-cols-3 gap-4 mt-16 content-center'>
       {flashCards?.map(el => (
-        <Link className='' key={el.name} to={`flash-cards/${el.name}`}>
+        <Link
+          className='bg-teal-200 text-center align-middle'
+          key={el.name}
+          to={`flash-cards/${el.name}`}
+        >
           {el.name}
         </Link>
       ))}
