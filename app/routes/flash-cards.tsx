@@ -5,7 +5,7 @@ import { supabase } from '~/supabase';
 import { Form, Link } from 'react-router';
 
 export async function loader({ params }: Route.LoaderArgs) {
-  if (!params.id) {
+  if (!params.name) {
     throw new Response('Not Found', { status: 404 });
   }
 
@@ -20,7 +20,7 @@ export async function loader({ params }: Route.LoaderArgs) {
     )
   `,
     )
-    .eq('name', params.id)
+    .eq('name', params.name)
     .single();
 
   if (!data) {

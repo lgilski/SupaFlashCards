@@ -1,15 +1,13 @@
 import { Form, redirect } from 'react-router';
 import type { Route } from './+types/edit-flash-cards';
 import { supabase } from '~/supabase';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 
 export async function loader({ params }: Route.LoaderArgs) {
-  // load this flash cards data
-
   const { data: categoryData } = await supabase
     .from('categories')
     .select()
-    .eq('name', params.id)
+    .eq('name', params.name)
     .single();
 
   const { data: cardsData } = await supabase
@@ -17,52 +15,111 @@ export async function loader({ params }: Route.LoaderArgs) {
     .select()
     .eq('category_id', categoryData.id);
 
-  return cardsData;
+  return { cardsData, categoryName: params.name };
 }
 
 export async function action({ params, request }: Route.ActionArgs) {
-  // delete/edit/delete cards
-
   const { data: categoryData } = await supabase
     .from('categories')
     .select()
-    .eq('name', params.id)
+    .eq('name', params.name)
     .single();
 
   const formData = await request.formData();
-  const ids = new Set();
+  const newName = formData.get('name');
 
-  // Zrozumieć to do końca i skomentować
+  if (newName !== params.name) {
+    await supabase
+      .from('categories')
+      .update({ name: newName })
+      .eq('id', categoryData.id);
+  }
+
+  // Usunięcie kart
+  const deletedIds = formData.getAll('deletedIds') as string[];
+  if (deletedIds.length > 0) {
+    const { error } = await supabase
+      .from('cards')
+      .delete()
+      .in('id', deletedIds);
+    if (error) console.error('delete error:', error);
+  }
+
+  // składanie pytań i odpowiedzi w pary
+  const ids = new Set<string>();
   for (const key of formData.keys()) {
-    const match = key.match(/^(question|answer)-(\d+)$/);
+    const match = key.match(/^(question|answer)-(.+)$/);
     if (match) ids.add(match[2]);
   }
 
-  const flashcards = [...ids].map(id => ({
-    category_id: categoryData.id,
-    question: formData.get(`question-${id}`),
-    answer: formData.get(`answer-${id}`),
-  }));
+  // Rozdzielenie pomiędzy elementami do aktualizacji a elementami do dodania
+  const toUpdate: {
+    id: string;
+    category_id: string;
+    question: string;
+    answer: string;
+  }[] = [];
+  const toInsert: { category_id: string; question: string; answer: string }[] =
+    [];
 
-  console.log(flashcards);
+  for (const id of ids) {
+    const card = {
+      category_id: categoryData.id,
+      question: formData.get(`question-${id}`) as string,
+      answer: formData.get(`answer-${id}`) as string,
+    };
+    if (id.startsWith('new-')) {
+      toInsert.push(card);
+    } else {
+      toUpdate.push({ id, ...card });
+    }
+  }
 
-  await supabase.from('cards').upsert(flashcards);
+  // Zaktualizuj istniejące karty
+  if (toUpdate.length > 0) {
+    for (const card of toUpdate) {
+      const { id, ...fields } = card;
+      const { error } = await supabase
+        .from('cards')
+        .update(fields)
+        .eq('id', id);
+      if (error) console.error('update error:', error);
+    }
+  }
 
-  return redirect(`/flash-cards/${params.id}`);
+  // Dodaj nowe karty
+  if (toInsert.length > 0) {
+    const { error } = await supabase.from('cards').insert(toInsert);
+    if (error) console.error('insert error:', error);
+  }
+
+  return redirect(`/flash-cards/${newName}`);
 }
 
-let id = 1;
 export default function EditFlashCards({ loaderData }: Route.ComponentProps) {
   const [currentFlashCards, setCurrentFlashCards] = useState<
     { id: string; question: string; answer: string }[]
-  >(loaderData ? loaderData : [{ id: '0', question: '', answer: '' }]);
+  >(
+    loaderData.cardsData
+      ? loaderData.cardsData
+      : [{ id: 'new-0', question: '', answer: '' }],
+  );
+  const [deletedIds, setDeletedIds] = useState<string[]>([]);
+
+  // początkowe id jest zgodne z tym z bazy danych
+  const initialIds = useRef(
+    new Set(loaderData?.cardsData?.map(card => card.id) ?? []),
+  );
+
+  // Generowanie tymczasowych id dla nowych elementów
+  const nextTempId = useRef(0);
 
   function addFlashCard() {
+    nextTempId.current++;
     setCurrentFlashCards(prevState => [
       ...prevState,
-      { id: '' + id, question: '', answer: '' },
+      { id: `new-${nextTempId.current}`, question: '', answer: '' },
     ]);
-    id++;
   }
 
   function updateFlashCard(id: string, field: string, newValue: string) {
@@ -77,14 +134,30 @@ export default function EditFlashCards({ loaderData }: Route.ComponentProps) {
     setCurrentFlashCards(prevState =>
       prevState.filter(flashCard => flashCard.id !== id),
     );
+    // zapamiętać do usunięcia tylko te karty, które już są w bazie,
+    // nowo stworzone elementy jeszcze nie zostały dodane, także nie ma potrzeby zapisania tego.
+    if (initialIds.current.has(id)) {
+      setDeletedIds(prev => [...prev, id]);
+    }
   }
 
   return (
     <Form method='post'>
       <div className='inline-flex flex-col'>
         <label htmlFor='name'>Category name</label>
-        <input className='bg-teal-100' name='name' type='text' />
+        <input
+          className='bg-teal-100'
+          name='name'
+          type='text'
+          defaultValue={loaderData.categoryName}
+        />
       </div>
+
+      {/* Ten input jest potrzebny, aby karty do usunięcia dotarły do action i aby móc je usunąc z bazy */}
+      {deletedIds.map(id => (
+        <input key={id} type='hidden' name='deletedIds' value={id} />
+      ))}
+
       <div className='flex flex-col gap-4'>
         {currentFlashCards.map((flashCard, index) => (
           <fieldset key={flashCard.id} className='flex'>
