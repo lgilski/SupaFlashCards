@@ -1,9 +1,11 @@
 import { Form, redirect } from 'react-router';
 import type { Route } from './+types/edit-flash-cards';
-import { supabase } from '~/supabase';
 import { useRef, useState } from 'react';
+import { createClient } from '~/utils/supabase.server';
 
-export async function loader({ params }: Route.LoaderArgs) {
+export async function loader({ params, request }: Route.LoaderArgs) {
+  const { supabase } = createClient(request);
+
   const { data: categoryData } = await supabase
     .from('categories')
     .select()
@@ -19,6 +21,8 @@ export async function loader({ params }: Route.LoaderArgs) {
 }
 
 export async function action({ params, request }: Route.ActionArgs) {
+  const { supabase } = createClient(request);
+
   const { data: categoryData } = await supabase
     .from('categories')
     .select()
@@ -134,8 +138,8 @@ export default function EditFlashCards({ loaderData }: Route.ComponentProps) {
     setCurrentFlashCards(prevState =>
       prevState.filter(flashCard => flashCard.id !== id),
     );
-    // zapamiętać do usunięcia tylko te karty, które już są w bazie,
-    // nowo stworzone elementy jeszcze nie zostały dodane, także nie ma potrzeby zapisania tego.
+    // zapamiętać do usunięcia tylko te karty, które już są w bazie.
+    // Nowo stworzone elementy jeszcze nie zostały dodane, także nie ma potrzeby zapisania tego.
     if (initialIds.current.has(id)) {
       setDeletedIds(prev => [...prev, id]);
     }

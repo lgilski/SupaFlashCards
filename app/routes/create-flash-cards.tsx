@@ -1,13 +1,15 @@
 import { Form, redirect } from 'react-router';
 import type { Route } from './+types/create-flash-cards';
-import { supabase } from '~/supabase';
 import { useState } from 'react';
+import { createClient } from '~/utils/supabase.server';
 
 // TODO: implement form checks before submiting. Give feedback to the user. Handle empty imputs.
 
 export async function action({ request }: Route.ActionArgs) {
   let formData = await request.formData();
   let name = formData.get('name');
+
+  const { supabase } = createClient(request);
 
   const { data: newCategoryData } = await supabase
     .from('categories')

@@ -1,13 +1,14 @@
 import { useState } from 'react';
-import { cardsData } from '~/data';
 import type { Route } from './+types/flash-cards';
-import { supabase } from '~/supabase';
 import { Form, Link } from 'react-router';
+import { createClient } from '~/utils/supabase.server';
 
-export async function loader({ params }: Route.LoaderArgs) {
+export async function loader({ params, request }: Route.LoaderArgs) {
   if (!params.name) {
     throw new Response('Not Found', { status: 404 });
   }
+
+  const { supabase } = createClient(request);
 
   const { data, error } = await supabase
     .from('categories')

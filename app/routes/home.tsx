@@ -1,7 +1,8 @@
+import { createClient } from '~/utils/supabase.server';
 import type { Route } from './+types/home';
 import { Link } from 'react-router';
 
-import { supabase } from '~/supabase';
+// import { supabase } from '~/supabase';
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -10,8 +11,11 @@ export function meta({}: Route.MetaArgs) {
   ];
 }
 
-export async function loader() {
+export async function loader({ request }: Route.LoaderArgs) {
+  const { supabase } = createClient(request);
   const { data, error } = await supabase.from('categories').select();
+
+  console.log(data);
 
   if (error) {
     console.error(error);
