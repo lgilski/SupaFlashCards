@@ -15,8 +15,6 @@ export async function loader({ request }: Route.LoaderArgs) {
   const { supabase } = createClient(request);
   const { data, error } = await supabase.from('categories').select();
 
-  console.log(data);
-
   if (error) {
     console.error(error);
   }

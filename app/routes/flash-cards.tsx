@@ -31,6 +31,7 @@ export async function loader({ params, request }: Route.LoaderArgs) {
   return data.data;
 }
 
+// Add randomized order of those flash cards
 export default function FlashCards({ loaderData }: Route.ComponentProps) {
   const data = loaderData;
   const [showAnswer, setShowAnswer] = useState(false);
@@ -53,11 +54,10 @@ export default function FlashCards({ loaderData }: Route.ComponentProps) {
     }
   }
 
-  function previouseQuestion() {
-    if (currentCard - 1 >= 0) {
-      setCurrentCard(prevState => prevState - 1);
-      setShowAnswer(false);
-    }
+  function addToRepeat() {
+    nextQuestion();
+
+    // Add logic
   }
 
   return (
@@ -76,30 +76,18 @@ export default function FlashCards({ loaderData }: Route.ComponentProps) {
       <div>
         {currentCard + 1}/{data.length} cards
       </div>
-      <div className='grid grid-cols-4 gap-8'>
+      <div className='grid grid-cols-2 gap-8'>
         <button
-          className='bg-teal-600 text-teal-100 px-4 py-2 rounded-xl'
-          onClick={previouseQuestion}
+          className='bg-red-600 text-teal-100 px-4 py-2 rounded-xl'
+          onClick={addToRepeat}
         >
-          Previouse
-        </button>
-        <button
-          className='bg-blue-grey-600 text-blue-grey-100 px-4 py-2 rounded-xl'
-          // onClick={nextQuestion}
-        >
-          Done
-        </button>
-        <button
-          className='bg-yellow-600 text-yellow-100 px-4 py-2 rounded-xl'
-          // onClick={nextQuestion}
-        >
-          Repeat
+          To repeat
         </button>
         <button
           className='bg-teal-600 text-teal-100 px-4 py-2 rounded-xl'
           onClick={nextQuestion}
         >
-          Next
+          I know
         </button>
       </div>
     </section>
