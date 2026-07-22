@@ -3,6 +3,26 @@ import type { Route } from './+types/flash-cards';
 import { Form, Link } from 'react-router';
 import { createClient } from '~/utils/supabase.server';
 
+function shuffle(array: any[]) {
+  const arrayToShufle = structuredClone(array);
+  let currentIndex = arrayToShufle.length;
+
+  // While there remain elements to shuffle...
+  while (currentIndex != 0) {
+    // Pick a remaining element...
+    let randomIndex = Math.floor(Math.random() * currentIndex);
+    currentIndex--;
+
+    // And swap it with the current element.
+    [arrayToShufle[currentIndex], arrayToShufle[randomIndex]] = [
+      arrayToShufle[randomIndex],
+      arrayToShufle[currentIndex],
+    ];
+  }
+
+  return arrayToShufle;
+}
+
 export async function loader({ params, request }: Route.LoaderArgs) {
   if (!params.name) {
     throw new Response('Not Found', { status: 404 });
@@ -34,10 +54,18 @@ export async function loader({ params, request }: Route.LoaderArgs) {
 // Add randomized order of those flash cards
 export default function FlashCards({ loaderData }: Route.ComponentProps) {
   const data = loaderData;
+  const [cardsToDisplay, setCardsToDisplay] = useState<
+    { question: string; answer: string }[]
+  >(shuffle(data));
+
   const [showAnswer, setShowAnswer] = useState(false);
   const [currentCard, setCurrentCard] = useState(0);
 
-  if (data.length < 1)
+  const [cardsToRepeat, setCardsToRepeat] = useState<
+    { question: string; answer: string }[]
+  >([]);
+
+  if (cardsToDisplay.length < 1)
     return (
       <section>
         <div>Brak danych...</div>
@@ -48,16 +76,39 @@ export default function FlashCards({ loaderData }: Route.ComponentProps) {
     );
 
   function nextQuestion() {
-    if (currentCard + 1 < data!.length) {
+    if (currentCard + 1 <= cardsToDisplay.length) {
       setCurrentCard(prevState => prevState + 1);
       setShowAnswer(false);
     }
   }
 
   function addToRepeat() {
-    nextQuestion();
+    setCardsToRepeat(prevState => [...prevState, cardsToDisplay[currentCard]]);
 
-    // Add logic
+    nextQuestion();
+  }
+
+  function repeatCards() {
+    setCardsToDisplay(shuffle(cardsToRepeat));
+    setCardsToRepeat([]);
+    setCurrentCard(0);
+  }
+
+  function startOver() {
+    setCardsToDisplay(shuffle(data));
+    setCardsToRepeat([]);
+    setCurrentCard(0);
+  }
+
+  if (currentCard === cardsToDisplay.length) {
+    return (
+      <section className='flex flex-col gap-4 items-center'>
+        {cardsToRepeat.length > 0 && (
+          <button onClick={repeatCards}>Repeat unlearned cards</button>
+        )}
+        <button onClick={startOver}>Start over</button>
+      </section>
+    );
   }
 
   return (
@@ -70,11 +121,11 @@ export default function FlashCards({ loaderData }: Route.ComponentProps) {
         onClick={() => setShowAnswer(prevState => !prevState)}
       >
         {showAnswer
-          ? `Odpowiedź: ${data[currentCard].answer}`
-          : data[currentCard].question}
+          ? `Odpowiedź: ${cardsToDisplay[currentCard].answer}`
+          : cardsToDisplay[currentCard].question}
       </div>
       <div>
-        {currentCard + 1}/{data.length} cards
+        {currentCard + 1}/{cardsToDisplay.length} cards
       </div>
       <div className='grid grid-cols-2 gap-8'>
         <button
