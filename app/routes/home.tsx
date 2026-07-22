@@ -31,7 +31,7 @@ export default function Home({ loaderData }: Route.ComponentProps) {
         <Link
           className='bg-teal-200 text-center align-middle'
           key={el.name}
-          to={`flash-cards/${el.name}`}
+          to={`flash-cards/${el.id}`}
         >
           {el.name}
         </Link>

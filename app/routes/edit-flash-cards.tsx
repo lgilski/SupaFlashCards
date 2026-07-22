@@ -9,15 +9,15 @@ export async function loader({ params, request }: Route.LoaderArgs) {
   const { data: categoryData } = await supabase
     .from('categories')
     .select()
-    .eq('name', params.name)
+    .eq('id', params.id)
     .single();
 
   const { data: cardsData } = await supabase
     .from('cards')
     .select()
-    .eq('category_id', categoryData.id);
+    .eq('category_id', params.id);
 
-  return { cardsData, categoryName: params.name };
+  return { cardsData, categoryName: categoryData.name };
 }
 
 export async function action({ params, request }: Route.ActionArgs) {
@@ -26,17 +26,17 @@ export async function action({ params, request }: Route.ActionArgs) {
   const { data: categoryData } = await supabase
     .from('categories')
     .select()
-    .eq('name', params.name)
+    .eq('id', params.id)
     .single();
 
   const formData = await request.formData();
   const newName = formData.get('name');
 
-  if (newName !== params.name) {
+  if (newName !== categoryData.name) {
     await supabase
       .from('categories')
       .update({ name: newName })
-      .eq('id', categoryData.id);
+      .eq('id', params.id);
   }
 
   // Usunięcie kart

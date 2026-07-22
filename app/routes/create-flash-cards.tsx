@@ -3,7 +3,7 @@ import type { Route } from './+types/create-flash-cards';
 import { useState } from 'react';
 import { createClient } from '~/utils/supabase.server';
 
-// TODO: implement form checks before submiting. Give feedback to the user. Handle empty imputs.
+// TODO: implement form checks before submiting. Give feedback to the user. Handle empty inputs.
 
 export async function action({ request }: Route.ActionArgs) {
   let formData = await request.formData();

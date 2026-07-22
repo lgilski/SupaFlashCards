@@ -24,7 +24,7 @@ function shuffle(array: any[]) {
 }
 
 export async function loader({ params, request }: Route.LoaderArgs) {
-  if (!params.name) {
+  if (!params.id) {
     throw new Response('Not Found', { status: 404 });
   }
 
@@ -34,14 +34,14 @@ export async function loader({ params, request }: Route.LoaderArgs) {
     .from('categories')
     .select(
       `
-    name,
+    id,
     data:cards (
       question,
       answer
     )
   `,
     )
-    .eq('name', params.name)
+    .eq('id', params.id)
     .single();
 
   if (!data) {
