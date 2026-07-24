@@ -68,7 +68,7 @@ export default function CreateFlashCards() {
     <Form method='post'>
       <div className='inline-flex flex-col'>
         <label htmlFor='name'>Category name</label>
-        <input className='bg-teal-100' name='name' type='text' />
+        <input className='bg-teal-100' id='name' name='name' type='text' />
       </div>
       <div className='flex flex-col gap-4'>
         {currentFlashCards.map((flashCard, index) => (
