@@ -2,8 +2,6 @@ import { createClient } from '~/utils/supabase.server';
 import type { Route } from './+types/home';
 import { Link } from 'react-router';
 
-// import { supabase } from '~/supabase';
-
 export function meta({}: Route.MetaArgs) {
   return [
     { title: 'New React Router App' },
