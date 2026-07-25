@@ -3,7 +3,7 @@ import { Link, Outlet } from 'react-router';
 export default function Sidebar() {
   return (
     <>
-      <nav className='flex items-center justify-between px-4 bg-teal-050 py-2'>
+      <nav className='flex items-baseline justify-between px-4 bg-teal-050 py-2'>
         <Link to={'/'} className='font-semibold text-2xl'>
           <span className='text-teal-600'>Supa</span>FlashCards
         </Link>

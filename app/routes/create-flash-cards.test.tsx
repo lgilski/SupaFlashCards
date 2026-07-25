@@ -57,7 +57,8 @@ describe('Test create flash cards', () => {
       screen.getAllByRole('button', { name: 'Remove flash card' })[0],
     );
 
-    // Sprawdzić, że nie istnieje pierwszy element
+    // getBy gdy istnieje, queryBy gdy może nie istnieć
+    expect(screen.queryByText('Flash card number 1')).not.toBeInTheDocument();
   });
   test.todo('can type in question and answer fields');
 });
