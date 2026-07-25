@@ -61,4 +61,6 @@ describe('Test create flash cards', () => {
     expect(screen.queryByText('Flash card number 1')).not.toBeInTheDocument();
   });
   test.todo('can type in question and answer fields');
+  test.todo('card name must be filled');
+  test.todo('card question and answer must be filled');
 });
