@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Form, Link } from 'react-router';
 import { getServerClient } from '~/utils/supabase.server';
 import type { Route } from './+types/flash-cards';
+import { userContext } from '~/context';
 
 function shuffle(array: any[]) {
   const arrayToShufle = structuredClone(array);
@@ -23,7 +24,7 @@ function shuffle(array: any[]) {
   return arrayToShufle;
 }
 
-export async function loader({ params, request }: Route.LoaderArgs) {
+export async function loader({ params, request, context }: Route.LoaderArgs) {
   if (!params.id) {
     throw new Response('Not Found', { status: 404 });
   }
@@ -49,7 +50,9 @@ export async function loader({ params, request }: Route.LoaderArgs) {
     throw new Response('There is no data', { status: 404 });
   }
 
-  return { data: data.data, categoryName: data.name };
+  const user = context.get(userContext);
+
+  return { data: data.data, categoryName: data.name, user };
 }
 
 export default function FlashCards({ loaderData }: Route.ComponentProps) {
