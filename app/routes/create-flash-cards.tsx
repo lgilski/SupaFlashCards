@@ -1,7 +1,7 @@
 import { Form, redirect } from 'react-router';
 import type { Route } from './+types/create-flash-cards';
 import { useState } from 'react';
-import { createClient } from '~/utils/supabase.server';
+import { getServerClient } from '~/utils/supabase.server';
 
 // TODO: implement form checks before submiting. Give feedback to the user. Handle empty inputs.
 
@@ -9,7 +9,7 @@ export async function action({ request }: Route.ActionArgs) {
   let formData = await request.formData();
   let name = formData.get('name');
 
-  const { supabase } = createClient(request);
+  const { supabase } = getServerClient(request);
 
   const { data: newCategoryData } = await supabase
     .from('categories')
@@ -65,49 +65,63 @@ export default function CreateFlashCards() {
   }
 
   return (
-    <Form method='post'>
+    <Form method='post' className='max-w-5xl mx-auto'>
       <div className='inline-flex flex-col'>
         <label htmlFor='name'>Category name</label>
         <input className='bg-teal-100' id='name' name='name' type='text' />
       </div>
-      <div className='flex flex-col gap-4'>
+      <div className='flex flex-col gap-4 mt-4'>
         {currentFlashCards.map((flashCard, index) => (
-          <fieldset key={flashCard.id} className='flex'>
+          <fieldset key={flashCard.id} className='flex justify-between'>
             <legend>Flash card number {index + 1}</legend>
-            <div>
-              <label htmlFor={`question-${flashCard.id}`}>Question</label>
-              <input
-                className='bg-teal-100'
-                name={`question-${flashCard.id}`}
-                id={`question-${flashCard.id}`}
-                value={flashCard.question}
-                onChange={e =>
-                  updateFlashCard(
-                    flashCard.id,
-                    'question',
-                    e.currentTarget.value,
-                  )
-                }
-              />
+            <div className='flex gap-4'>
+              <div className='flex flex-col'>
+                <label htmlFor={`question-${flashCard.id}`}>Question</label>
+                <input
+                  className='bg-teal-100'
+                  name={`question-${flashCard.id}`}
+                  id={`question-${flashCard.id}`}
+                  value={flashCard.question}
+                  onChange={e =>
+                    updateFlashCard(
+                      flashCard.id,
+                      'question',
+                      e.currentTarget.value,
+                    )
+                  }
+                />
+              </div>
+              <div className='flex flex-col'>
+                <label htmlFor={`answer-${flashCard.id}`}>Answer</label>
+                <input
+                  className='bg-teal-100'
+                  name={`answer-${flashCard.id}`}
+                  id={`answer-${flashCard.id}`}
+                  value={flashCard.answer}
+                  onChange={e =>
+                    updateFlashCard(
+                      flashCard.id,
+                      'answer',
+                      e.currentTarget.value,
+                    )
+                  }
+                />
+              </div>
             </div>
-            <div>
-              <label htmlFor={`answer-${flashCard.id}`}>Answer</label>
-              <input
-                className='bg-teal-100'
-                name={`answer-${flashCard.id}`}
-                id={`answer-${flashCard.id}`}
-                value={flashCard.answer}
-                onChange={e =>
-                  updateFlashCard(flashCard.id, 'answer', e.currentTarget.value)
-                }
-              />
-            </div>
-            <button type='button' onClick={() => removeFlashCard(flashCard.id)}>
+            <button
+              className='text-red-500'
+              type='button'
+              onClick={() => removeFlashCard(flashCard.id)}
+            >
               Remove flash card
             </button>
           </fieldset>
         ))}
-        <button type='button' onClick={addFlashCard}>
+        <button
+          className='mx-auto bg-teal-100'
+          type='button'
+          onClick={addFlashCard}
+        >
           Add flash card
         </button>
         <button type='submit'>Submit</button>

@@ -74,6 +74,9 @@ html,
 body {
   box-sizing: border-box;
 
+  height: 100%;
+  margin: 0;
+
   /* background-color: #555;
   color: #f1f1f1; */
 }

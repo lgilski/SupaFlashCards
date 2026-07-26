@@ -8,6 +8,11 @@ import {
 export default [
   layout('layouts/sidebar.tsx', [
     index('routes/home.tsx'),
+    route('/login', 'routes/login.tsx'),
+    route('/signup', 'routes/signup.tsx'),
+    route('/logout', 'routes/logout.tsx'),
+
+    route('/dashboard', 'routes/dashboard.tsx'),
     route('/flash-cards/:id', 'routes/flash-cards.tsx'),
     route('/flash-cards/:id/edit', 'routes/edit-flash-cards.tsx'),
     route('/flash-cards/create', 'routes/create-flash-cards.tsx'),

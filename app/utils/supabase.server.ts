@@ -4,12 +4,8 @@ import {
   serializeCookieHeader,
 } from '@supabase/ssr';
 
-export function createClient(request: Request) {
+export function getServerClient(request: Request) {
   const headers = new Headers();
-
-  // import.meta.env.VITE_SUPABASE_URL,
-  // import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
-
   const supabase = createServerClient(
     process.env.VITE_SUPABASE_URL!,
     process.env.VITE_SUPABASE_PUBLISHABLE_KEY!,
@@ -21,13 +17,16 @@ export function createClient(request: Request) {
             value: string;
           }[];
         },
-        setAll(cookiesToSet) {
+        setAll(cookiesToSet, cacheHeaders) {
           cookiesToSet.forEach(({ name, value, options }) =>
             headers.append(
               'Set-Cookie',
               serializeCookieHeader(name, value, options),
             ),
           );
+          // Object.entries(cacheHeaders).forEach(([key, value]) =>
+          //   headers.set(key, value),
+          // );
         },
       },
     },

@@ -1,10 +1,10 @@
 import { Form, redirect } from 'react-router';
 import type { Route } from './+types/edit-flash-cards';
 import { useRef, useState } from 'react';
-import { createClient } from '~/utils/supabase.server';
+import { getServerClient } from '~/utils/supabase.server';
 
 export async function loader({ params, request }: Route.LoaderArgs) {
-  const { supabase } = createClient(request);
+  const { supabase } = getServerClient(request);
 
   const { data: categoryData } = await supabase
     .from('categories')
@@ -21,7 +21,7 @@ export async function loader({ params, request }: Route.LoaderArgs) {
 }
 
 export async function action({ params, request }: Route.ActionArgs) {
-  const { supabase } = createClient(request);
+  const { supabase } = getServerClient(request);
 
   const { data: categoryData } = await supabase
     .from('categories')

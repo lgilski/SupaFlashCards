@@ -1,6 +1,5 @@
-import { createClient } from '~/utils/supabase.server';
-import type { Route } from './+types/home';
 import { Link } from 'react-router';
+import type { Route } from './+types/home';
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -9,31 +8,24 @@ export function meta({}: Route.MetaArgs) {
   ];
 }
 
-export async function loader({ request }: Route.LoaderArgs) {
-  const { supabase } = createClient(request);
-  const { data, error } = await supabase.from('categories').select();
-
-  if (error) {
-    console.error(error);
-  }
-
-  return data;
-}
-
-export default function Home({ loaderData }: Route.ComponentProps) {
-  const flashCards = loaderData;
-
+export default function Home() {
   return (
-    <section className='grid grid-cols-3 gap-4 mt-16 content-center'>
-      {flashCards?.map(el => (
+    <section className='w-full flex py-40 bg-teal-100'>
+      <div className='max-w-7xl mx-auto text-center'>
+        <h1 className='font-bold text-4xl'>
+          Welcome to <span className='text-teal-600'>Supa</span>FlashCards!
+        </h1>
+        <p className='mt-2 mb-4'>
+          Here you can create "supa" flash cards so you can learn how you like
+          :)
+        </p>
         <Link
-          className='bg-teal-200 text-center align-middle'
-          key={el.name}
-          to={`flash-cards/${el.id}`}
+          className='px-4 py-2 bg-teal-600 text-teal-050 text-lg rounded-lg'
+          to={'dashboard'}
         >
-          {el.name}
+          Go to dashboard
         </Link>
-      ))}
+      </div>
     </section>
   );
 }

@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import type { Route } from './+types/flash-cards';
 import { Form, Link } from 'react-router';
-import { createClient } from '~/utils/supabase.server';
+import { getServerClient } from '~/utils/supabase.server';
+import type { Route } from './+types/flash-cards';
 
 function shuffle(array: any[]) {
   const arrayToShufle = structuredClone(array);
@@ -28,13 +28,14 @@ export async function loader({ params, request }: Route.LoaderArgs) {
     throw new Response('Not Found', { status: 404 });
   }
 
-  const { supabase } = createClient(request);
+  const { supabase } = getServerClient(request);
 
   const { data, error } = await supabase
     .from('categories')
     .select(
       `
     id,
+    name,
     data:cards (
       question,
       answer
@@ -48,12 +49,11 @@ export async function loader({ params, request }: Route.LoaderArgs) {
     throw new Response('There is no data', { status: 404 });
   }
 
-  return data.data;
+  return { data: data.data, categoryName: data.name };
 }
 
-// Add randomized order of those flash cards
 export default function FlashCards({ loaderData }: Route.ComponentProps) {
-  const data = loaderData;
+  const { data, categoryName } = loaderData;
   const [cardsToDisplay, setCardsToDisplay] = useState<
     { question: string; answer: string }[]
   >(shuffle(data));
@@ -112,10 +112,13 @@ export default function FlashCards({ loaderData }: Route.ComponentProps) {
   }
 
   return (
-    <section className='flex flex-col gap-4 items-center'>
-      <Form action='edit'>
-        <button type='submit'>Edit</button>
-      </Form>
+    <section className='max-w-3xl mx-auto flex flex-col gap-4 items-center'>
+      <div className='w-full flex justify-between'>
+        <h2>{categoryName}</h2>
+        <Form action='edit'>
+          <button type='submit'>Edit</button>
+        </Form>
+      </div>
       <div
         className={`flex justify-center items-center text-5xl text-center rounded-xl w-3xl h-96 p-2 bg-teal-050 border border-teal-700 text-teal-900`}
         onClick={() => setShowAnswer(prevState => !prevState)}
