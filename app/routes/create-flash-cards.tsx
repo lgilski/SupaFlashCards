@@ -2,12 +2,11 @@ import { Form, redirect } from 'react-router';
 import type { Route } from './+types/create-flash-cards';
 import { useState } from 'react';
 import { getServerClient } from '~/utils/supabase.server';
-import { userContext } from '~/context';
 
 // TODO: implement form checks before submiting. Give feedback to the user. Handle empty inputs.
 
 export async function loader({ context }: Route.LoaderArgs) {
-  return { user: context.get(userContext) };
+  return null;
 }
 
 export async function action({ request }: Route.ActionArgs) {

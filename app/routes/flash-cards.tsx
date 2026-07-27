@@ -123,7 +123,7 @@ export default function FlashCards({ loaderData }: Route.ComponentProps) {
         </Form>
       </div>
       <div
-        className={`flex justify-center items-center text-5xl text-center rounded-xl w-3xl h-96 p-2 bg-teal-050 border border-teal-700 text-teal-900`}
+        className={`flex justify-center items-center text-4xl text-center rounded-xl w-3xl h-96 p-2 bg-teal-050 border border-teal-700 text-teal-900`}
         onClick={() => setShowAnswer(prevState => !prevState)}
       >
         {showAnswer

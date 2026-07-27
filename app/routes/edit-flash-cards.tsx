@@ -97,7 +97,7 @@ export async function action({ params, request }: Route.ActionArgs) {
     if (error) console.error('insert error:', error);
   }
 
-  return redirect(`/flash-cards/${newName}`);
+  return redirect(`/flash-cards/${params.id}`);
 }
 
 export default function EditFlashCards({ loaderData }: Route.ComponentProps) {

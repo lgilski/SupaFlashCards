@@ -22,21 +22,6 @@ export async function loader({ request }: Route.LoaderArgs) {
   );
 }
 
-// export async function action({ request }: Route.ActionArgs) {
-//   const formData = await request.formData();
-
-//   const supabase = getServerClient(request);
-
-//   const { data, error } = await supabase.auth.signInWithPassword({
-//     email: formData.get('email') as string,
-//     password: formData.get('password') as string,
-//   });
-
-//   if (data.session) {
-//     return redirect('/dashboard');
-//   }
-// }
-
 export default function doLogin({ loaderData }: Route.ComponentProps) {
   const { env } = loaderData;
   const navigate = useNavigate();
