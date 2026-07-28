@@ -1,7 +1,11 @@
 import { render, screen } from '@testing-library/react';
 import { describe, expect, test } from 'vitest';
 import CreateFlashCards from './create-flash-cards';
-import { createMemoryRouter, RouterProvider } from 'react-router';
+import {
+  createMemoryRouter,
+  createRoutesStub,
+  RouterProvider,
+} from 'react-router';
 import userEvent from '@testing-library/user-event';
 
 // usuwanie kart, wpisywanie danych, dane do action są poprawne, jest przekierowanie do nowej strony, pojawiają się nowe pola
@@ -11,20 +15,34 @@ import userEvent from '@testing-library/user-event';
 
 // Musi być tego typu funkcja gdy: jest form, loader/action, i zachowanie po submicie
 function renderCreateFlashCards() {
-  // createMemoryRouter tworzy obiekt routera i daje potrzebny kontekst (route, nawigacja i kontekst dla form)
-  const router = createMemoryRouter([
+  // // createMemoryRouter tworzy obiekt routera i daje potrzebny kontekst (route, nawigacja i kontekst dla form)
+  // const router = createMemoryRouter([
+  //   {
+  //     // Tutaj tworzy się fakeowe routing - tutaj mówimy, że jest tylko jedna ścieżka.
+  //     // Gdyby test zależał od innych ścieżek, wpisałoby się tutaj inne ścieżki
+  //     path: '/',
+  //     // A to jest przykład przy nested strukturze
+  //     // children: [{ path: ':id', element: <SomeComponent /> }],
+  //     element: <CreateFlashCards />,
+  //   },
+  // ]);
+
+  // // To łączy to co stworzył createMemoryRouter z drzewem renderu komponentu
+  // return render(<RouterProvider router={router} />);
+
+  const Stub = createRoutesStub([
     {
-      // Tutaj tworzy się fakeowe routing - tutaj mówimy, że jest tylko jedna ścieżka.
-      // Gdyby test zależał od innych ścieżek, wpisałoby się tutaj inne ścieżki
       path: '/',
-      // A to jest przykład przy nested strukturze
-      // children: [{ path: ':id', element: <SomeComponent /> }],
-      element: <CreateFlashCards />,
+      Component: CreateFlashCards,
+      loader() {
+        return { isAnonymous: false };
+      },
     },
   ]);
 
-  // To łączy to co stworzył createMemoryRouter z drzewem renderu komponentu
-  return render(<RouterProvider router={router} />);
+  render(<Stub initialEntries={['/']} />);
+
+  expect(screen.getByText('FlashCards')).toBeInTheDocument();
 }
 
 describe('Test create flash cards', () => {

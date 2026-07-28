@@ -73,6 +73,7 @@
 html,
 body {
   box-sizing: border-box;
+  background-color: var(--color-blue-grey-050);
 
   height: 100%;
   margin: 0;

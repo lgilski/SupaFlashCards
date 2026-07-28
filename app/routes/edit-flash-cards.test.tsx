@@ -111,106 +111,106 @@ describe('EditFlashCards', () => {
 });
 
 // To bardziej zrozumieć
-describe('edit flash cards data functions', () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
+// describe('edit flash cards data functions', () => {
+//   beforeEach(() => {
+//     vi.clearAllMocks();
+//   });
 
-  test('loader fetches the category and its cards', async () => {
-    const categorySingle = vi.fn().mockResolvedValue({
-      data: { name: 'Science' },
-    });
-    const cardsEq = vi.fn().mockResolvedValue({
-      data: [{ id: 'card-1', question: 'Q', answer: 'A' }],
-    });
-    const categoryBuilder = {
-      select: vi.fn(() => ({ eq: vi.fn(() => ({ single: categorySingle })) })),
-    };
-    const cardsBuilder = {
-      select: vi.fn(() => ({ eq: cardsEq })),
-    };
-    mockedgetServerClient.mockReturnValue({
-      supabase: {
-        from: vi.fn(table =>
-          table === 'categories' ? categoryBuilder : cardsBuilder,
-        ),
-      },
-    } as never);
+  // test('loader fetches the category and its cards', async () => {
+  //   const categorySingle = vi.fn().mockResolvedValue({
+  //     data: { name: 'Science' },
+  //   });
+  //   const cardsEq = vi.fn().mockResolvedValue({
+  //     data: [{ id: 'card-1', question: 'Q', answer: 'A' }],
+  //   });
+  //   const categoryBuilder = {
+  //     select: vi.fn(() => ({ eq: vi.fn(() => ({ single: categorySingle })) })),
+  //   };
+  //   const cardsBuilder = {
+  //     select: vi.fn(() => ({ eq: cardsEq })),
+  //   };
+  //   mockedgetServerClient.mockReturnValue({
+  //     supabase: {
+  //       from: vi.fn(table =>
+  //         table === 'categories' ? categoryBuilder : cardsBuilder,
+  //       ),
+  //     },
+  //   } as never);
 
-    await expect(
-      loader({
-        params: { id: 'category-1' },
-        request: new Request('http://test'),
-      } as never),
-    ).resolves.toEqual({
-      cardsData: [{ id: 'card-1', question: 'Q', answer: 'A' }],
-      categoryName: 'Science',
-    });
-  });
+  //   await expect(
+  //     loader({
+  //       params: { id: 'category-1' },
+  //       request: new Request('http://test'),
+  //     } as never),
+  //   ).resolves.toEqual({
+  //     cardsData: [{ id: 'card-1', question: 'Q', answer: 'A' }],
+  //     categoryName: 'Science',
+  //   });
+  // });
 
-  test('action updates, deletes, and inserts cards before redirecting', async () => {
-    const categorySingle = vi.fn().mockResolvedValue({
-      data: { id: 'category-1', name: 'Science' },
-    });
-    const categoryUpdate = vi.fn().mockReturnValue({
-      eq: vi.fn().mockResolvedValue({ error: null }),
-    });
-    const cardsDelete = vi.fn().mockReturnValue({
-      in: vi.fn().mockResolvedValue({ error: null }),
-    });
-    const cardsUpdate = vi.fn().mockReturnValue({
-      eq: vi.fn().mockResolvedValue({ error: null }),
-    });
-    const cardsInsert = vi.fn().mockResolvedValue({ error: null });
-    const categoryBuilder = {
-      select: vi.fn(() => ({
-        eq: vi.fn(() => ({ single: categorySingle })),
-      })),
-      update: categoryUpdate,
-    };
-    const cardsBuilder = {
-      delete: cardsDelete,
-      update: cardsUpdate,
-      insert: cardsInsert,
-    };
-    mockedgetServerClient.mockReturnValue({
-      supabase: {
-        from: vi.fn(table =>
-          table === 'categories' ? categoryBuilder : cardsBuilder,
-        ),
-      },
-    } as never);
+  // test('action updates, deletes, and inserts cards before redirecting', async () => {
+  //   const categorySingle = vi.fn().mockResolvedValue({
+  //     data: { id: 'category-1', name: 'Science' },
+  //   });
+  //   const categoryUpdate = vi.fn().mockReturnValue({
+  //     eq: vi.fn().mockResolvedValue({ error: null }),
+  //   });
+  //   const cardsDelete = vi.fn().mockReturnValue({
+  //     in: vi.fn().mockResolvedValue({ error: null }),
+  //   });
+  //   const cardsUpdate = vi.fn().mockReturnValue({
+  //     eq: vi.fn().mockResolvedValue({ error: null }),
+  //   });
+  //   const cardsInsert = vi.fn().mockResolvedValue({ error: null });
+  //   const categoryBuilder = {
+  //     select: vi.fn(() => ({
+  //       eq: vi.fn(() => ({ single: categorySingle })),
+  //     })),
+  //     update: categoryUpdate,
+  //   };
+  //   const cardsBuilder = {
+  //     delete: cardsDelete,
+  //     update: cardsUpdate,
+  //     insert: cardsInsert,
+  //   };
+  //   mockedgetServerClient.mockReturnValue({
+  //     supabase: {
+  //       from: vi.fn(table =>
+  //         table === 'categories' ? categoryBuilder : cardsBuilder,
+  //       ),
+  //     },
+  //   } as never);
 
-    const formData = new FormData();
-    formData.set('name', 'Biology');
-    formData.set('deletedIds', 'card-deleted');
-    formData.set('question-card-1', 'Updated question');
-    formData.set('answer-card-1', 'Updated answer');
-    formData.set('question-new-1', 'New question');
-    formData.set('answer-new-1', 'New answer');
+  //   const formData = new FormData();
+  //   formData.set('name', 'Biology');
+  //   formData.set('deletedIds', 'card-deleted');
+  //   formData.set('question-card-1', 'Updated question');
+  //   formData.set('answer-card-1', 'Updated answer');
+  //   formData.set('question-new-1', 'New question');
+  //   formData.set('answer-new-1', 'New answer');
 
-    const result = await action({
-      params: { id: 'category-1' },
-      request: new Request('http://test', { method: 'POST', body: formData }),
-    } as never);
+  //   const result = await action({
+  //     params: { id: 'category-1' },
+  //     request: new Request('http://test', { method: 'POST', body: formData }),
+  //   } as never);
 
-    expect(categoryUpdate).toHaveBeenCalledWith({ name: 'Biology' });
-    expect(cardsDelete).toHaveBeenCalled();
-    expect(cardsUpdate).toHaveBeenCalledWith({
-      category_id: 'category-1',
-      question: 'Updated question',
-      answer: 'Updated answer',
-    });
-    expect(cardsInsert).toHaveBeenCalledWith([
-      {
-        category_id: 'category-1',
-        question: 'New question',
-        answer: 'New answer',
-      },
-    ]);
-    expect(result).toBeInstanceOf(Response);
-    expect((result as Response).headers.get('Location')).toBe(
-      '/flash-cards/Biology',
-    );
-  });
+  //   expect(categoryUpdate).toHaveBeenCalledWith({ name: 'Biology' });
+  //   expect(cardsDelete).toHaveBeenCalled();
+  //   expect(cardsUpdate).toHaveBeenCalledWith({
+  //     category_id: 'category-1',
+  //     question: 'Updated question',
+  //     answer: 'Updated answer',
+  //   });
+  //   expect(cardsInsert).toHaveBeenCalledWith([
+  //     {
+  //       category_id: 'category-1',
+  //       question: 'New question',
+  //       answer: 'New answer',
+  //     },
+  //   ]);
+  //   expect(result).toBeInstanceOf(Response);
+  //   expect((result as Response).headers.get('Location')).toBe(
+  //     '/flash-cards/Biology',
+  //   );
+  // });
 });

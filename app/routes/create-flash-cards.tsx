@@ -72,7 +72,7 @@ export default function CreateFlashCards({ loaderData }: Route.ComponentProps) {
     );
   }
 
-  function handleSubmit(event: SubmitEvent) {
+  function handleSubmit(event: SubmitEvent<HTMLFormElement>) {
     if (!isAnonymous) return; // let the Form submit normally to the server action
 
     event.preventDefault();

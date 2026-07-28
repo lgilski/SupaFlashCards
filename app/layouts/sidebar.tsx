@@ -34,7 +34,7 @@ export default function Sidebar({ loaderData }: Route.ComponentProps) {
           )}
         </div>
       </nav>
-      <main className='bg-gray-50 h-full'>
+      <main>
         <Outlet />
       </main>
     </>

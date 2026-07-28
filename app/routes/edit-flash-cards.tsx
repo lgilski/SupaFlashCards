@@ -39,7 +39,7 @@ export async function clientLoader({
 
   const cards = JSON.parse(localStorage.getItem('cards') ?? '{}');
   const categories = JSON.parse(localStorage.getItem('categories') ?? '[]');
-  const category = categories.find((c: any) => c.id === params.id);
+  const category = categories.find((el: any) => el.id === params.id);
 
   return {
     cardsData: cards[params.id],
@@ -184,7 +184,7 @@ export default function EditFlashCards({
     }
   }
 
-  function handleSubmit(event: SubmitEvent) {
+  function handleSubmit(event: SubmitEvent<HTMLFormElement>) {
     if (!isAnonymous) return;
     event.preventDefault();
 

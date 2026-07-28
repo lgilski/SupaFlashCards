@@ -1,15 +1,21 @@
 import { render, screen } from '@testing-library/react';
 import { describe, expect, test } from 'vitest';
+import { createRoutesStub } from 'react-router';
 import Sidebar from './sidebar';
-import { MemoryRouter } from 'react-router';
 
 describe('Sidebar', () => {
   test('renders', () => {
-    render(
-      <MemoryRouter>
-        <Sidebar />
-      </MemoryRouter>,
-    );
+    const Stub = createRoutesStub([
+      {
+        path: '/',
+        Component: Sidebar,
+        loader() {
+          return { user: null };
+        },
+      },
+    ]);
+
+    render(<Stub initialEntries={['/']} />);
 
     expect(screen.getByText('FlashCards')).toBeInTheDocument();
   });

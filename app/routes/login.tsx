@@ -2,6 +2,7 @@ import { getServerClient } from '~/utils/supabase.server';
 import type { Route } from './+types/login';
 import { data, Form, redirect, useNavigate } from 'react-router';
 import { createBrowserClient } from '@supabase/ssr';
+import type { SubmitEvent } from 'react';
 
 export async function loader({ request }: Route.LoaderArgs) {
   const { supabase, headers } = getServerClient(request);
@@ -26,7 +27,7 @@ export default function doLogin({ loaderData }: Route.ComponentProps) {
   const { env } = loaderData;
   const navigate = useNavigate();
 
-  async function doLogin(event: React.SubmitEvent) {
+  async function doLogin(event: SubmitEvent<HTMLFormElement>) {
     event.preventDefault();
 
     const formData = new FormData(event.currentTarget);
