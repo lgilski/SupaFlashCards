@@ -1,9 +1,15 @@
 import { Form, redirect } from 'react-router';
 import type { Route } from './+types/edit-flash-cards';
-import { useRef, useState } from 'react';
+import { useRef, useState, type SubmitEvent } from 'react';
 import { getServerClient } from '~/utils/supabase.server';
+import { userContext } from '~/context';
+import { cardsData } from '~/data';
 
-export async function loader({ params, request }: Route.LoaderArgs) {
+export async function loader({ params, request, context }: Route.LoaderArgs) {
+  const user = context.get(userContext);
+
+  if (user?.is_anonymous) return null;
+
   const { supabase } = getServerClient(request);
 
   const { data: categoryData } = await supabase
@@ -17,7 +23,35 @@ export async function loader({ params, request }: Route.LoaderArgs) {
     .select()
     .eq('category_id', params.id);
 
-  return { cardsData, categoryName: categoryData.name };
+  return {
+    cardsData,
+    categoryName: categoryData?.name ?? '',
+    isAnonymous: false,
+  };
+}
+
+export async function clientLoader({
+  serverLoader,
+  params,
+}: Route.ClientLoaderArgs) {
+  const serverData = await serverLoader();
+  if (serverData) return serverData;
+
+  const cards = JSON.parse(localStorage.getItem('cards') ?? '{}');
+  const categories = JSON.parse(localStorage.getItem('categories') ?? '[]');
+  const category = categories.find((c: any) => c.id === params.id);
+
+  return {
+    cardsData: cards[params.id],
+    categoryName: category.name,
+    isAnonymous: true,
+  };
+}
+
+clientLoader.hydrate = true as const;
+
+export function HydrateFallback() {
+  return <div>Loading...</div>;
 }
 
 export async function action({ params, request }: Route.ActionArgs) {
@@ -100,7 +134,12 @@ export async function action({ params, request }: Route.ActionArgs) {
   return redirect(`/flash-cards/${params.id}`);
 }
 
-export default function EditFlashCards({ loaderData }: Route.ComponentProps) {
+export default function EditFlashCards({
+  loaderData,
+  params,
+}: Route.ComponentProps) {
+  const { isAnonymous } = loaderData;
+
   const [currentFlashCards, setCurrentFlashCards] = useState<
     { id: string; question: string; answer: string }[]
   >(
@@ -112,7 +151,7 @@ export default function EditFlashCards({ loaderData }: Route.ComponentProps) {
 
   // początkowe id jest zgodne z tym z bazy danych
   const initialIds = useRef(
-    new Set(loaderData?.cardsData?.map(card => card.id) ?? []),
+    new Set(loaderData?.cardsData?.map((card: any) => card.id) ?? []),
   );
 
   // Generowanie tymczasowych id dla nowych elementów
@@ -145,8 +184,33 @@ export default function EditFlashCards({ loaderData }: Route.ComponentProps) {
     }
   }
 
+  function handleSubmit(event: SubmitEvent) {
+    if (!isAnonymous) return;
+    event.preventDefault();
+
+    const formData = new FormData(event.currentTarget);
+    const newName = formData.get('name') as string;
+
+    const categories = JSON.parse(localStorage.getItem('categories') ?? '[]');
+    const cards = JSON.parse(localStorage.getItem('cards') ?? '{}');
+
+    const updatedCategories = categories.map((el: any) =>
+      el.id === params.id ? { ...el, name: newName } : el,
+    );
+
+    cards[params.id!] = currentFlashCards.map(({ question, answer }) => ({
+      question,
+      answer,
+    }));
+
+    localStorage.setItem('categories', JSON.stringify(updatedCategories));
+    localStorage.setItem('cards', JSON.stringify(cards));
+
+    window.location.href = `/flash-cards/${params.id}`;
+  }
+
   return (
-    <Form method='post'>
+    <Form method='post' onSubmit={handleSubmit}>
       <div className='inline-flex flex-col'>
         <label htmlFor='name'>Category name</label>
         <input

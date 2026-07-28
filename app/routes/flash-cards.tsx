@@ -1,10 +1,8 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Form, Link } from 'react-router';
 import { getServerClient } from '~/utils/supabase.server';
 import type { Route } from './+types/flash-cards';
 import { userContext } from '~/context';
-
-// Add here a anonymous user functionality
 
 function shuffle(array: any[]) {
   const arrayToShufle = structuredClone(array);
@@ -27,9 +25,13 @@ function shuffle(array: any[]) {
 }
 
 export async function loader({ params, request, context }: Route.LoaderArgs) {
+  const user = context.get(userContext);
+
   if (!params.id) {
     throw new Response('Not Found', { status: 404 });
   }
+
+  if (user?.is_anonymous) return null;
 
   const { supabase } = getServerClient(request);
 
@@ -37,13 +39,13 @@ export async function loader({ params, request, context }: Route.LoaderArgs) {
     .from('categories')
     .select(
       `
-    id,
-    name,
-    data:cards (
-      question,
-      answer
-    )
-  `,
+      id,
+      name,
+      data:cards (
+        question,
+        answer
+        )
+        `,
     )
     .eq('id', params.id)
     .single();
@@ -52,13 +54,35 @@ export async function loader({ params, request, context }: Route.LoaderArgs) {
     throw new Response('There is no data', { status: 404 });
   }
 
-  const user = context.get(userContext);
+  return { data: data.data, categoryName: data.name, isAnonymous: false };
+}
 
-  return { data: data.data, categoryName: data.name, user };
+export async function clientLoader({
+  serverLoader,
+  params,
+}: Route.ClientLoaderArgs) {
+  const serverData = await serverLoader();
+  if (serverData) return serverData; // logged-in user, server already handled it
+
+  // anonymous — read from localStorage instead
+  const cards = JSON.parse(localStorage.getItem('cards') ?? '{}');
+  const categories = JSON.parse(localStorage.getItem('categories') ?? '[]');
+  const category = categories.find((c: any) => c.id === params.id);
+
+  return {
+    data: cards[params.id] ?? [],
+    categoryName: category?.name ?? '',
+    isAnonymous: true,
+  };
+}
+clientLoader.hydrate = true as const;
+
+export function HydrateFallback() {
+  return <div>Loading...</div>;
 }
 
 export default function FlashCards({ loaderData }: Route.ComponentProps) {
-  const { data, categoryName } = loaderData;
+  const { data, categoryName, isAnonymous } = loaderData;
   const [cardsToDisplay, setCardsToDisplay] = useState<
     { question: string; answer: string }[]
   >(shuffle(data));
@@ -69,16 +93,6 @@ export default function FlashCards({ loaderData }: Route.ComponentProps) {
   const [cardsToRepeat, setCardsToRepeat] = useState<
     { question: string; answer: string }[]
   >([]);
-
-  if (cardsToDisplay.length < 1)
-    return (
-      <section>
-        <div>Brak danych...</div>
-        <Form action='edit'>
-          <button type='submit'>Edit</button>
-        </Form>
-      </section>
-    );
 
   function nextQuestion() {
     if (currentCard + 1 <= cardsToDisplay.length) {
@@ -103,6 +117,17 @@ export default function FlashCards({ loaderData }: Route.ComponentProps) {
     setCardsToDisplay(shuffle(data));
     setCardsToRepeat([]);
     setCurrentCard(0);
+  }
+
+  if (cardsToDisplay.length < 1) {
+    return (
+      <section>
+        <div>Brak danych...</div>
+        <Form action='edit'>
+          <button type='submit'>Edit</button>
+        </Form>
+      </section>
+    );
   }
 
   if (currentCard === cardsToDisplay.length) {

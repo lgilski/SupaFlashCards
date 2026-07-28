@@ -14,37 +14,41 @@ export function meta({}: Route.MetaArgs) {
 export async function loader({ request, context }: Route.LoaderArgs) {
   const user = context.get(userContext);
 
-  if (!user?.is_anonymous) {
-    const { supabase } = getServerClient(request);
-    const { data, error } = await supabase.from('categories').select();
+  if (user?.is_anonymous) return null;
 
-    if (error) {
-      console.error(error);
-    }
+  const { supabase } = getServerClient(request);
+  const { data, error } = await supabase.from('categories').select();
 
-    return { data, userEmail: user?.email, isAnonymous: false };
-  } else {
-    return { data: null, userEmail: '', isAnonymous: true };
+  if (error) {
+    console.error(error);
   }
+
+  return { data, userEmail: user?.email, isAnonymous: false };
+}
+
+export async function clientLoader({ serverLoader }: Route.ClientLoaderArgs) {
+  const serverData = await serverLoader();
+  if (serverData) return serverData; // user is logged in
+
+  const categories: string[] = JSON.parse(
+    localStorage.getItem('categories') ?? '[]',
+  );
+  return { data: categories, userEmail: '', isAnonymous: true };
+}
+clientLoader.hydrate = true as const;
+
+export function HydrateFallback() {
+  return <div>Loading...</div>;
 }
 
 export default function Home({ loaderData }: Route.ComponentProps) {
-  const { data: categories, userEmail, isAnonymous } = loaderData;
-
-  const [categoriesToDisplay, setCategoriesToDisplay] = useState(categories);
-
-  useEffect(() => {
-    if (isAnonymous) {
-      const categoriesData = JSON.parse(localStorage.getItem('categories')!);
-      setCategoriesToDisplay(categoriesData);
-    }
-  }, [isAnonymous, setCategoriesToDisplay]);
+  const { data: categories, userEmail } = loaderData;
 
   return (
     <section className='max-w-7xl mx-auto grid grid-cols-3 gap-8 pt-16 content-center'>
       <div>Welcome {userEmail}</div>
-      {/* Add graphics for each category/group */}
-      {categoriesToDisplay?.map(el => (
+      {/* Add graphics for each category/group?? */}
+      {categories?.map(el => (
         <Link
           className='bg-teal-200 px-4 py-2 h-32 items-center justify-center flex text-xl rounded-xl transition-all duration-200 hover:-translate-y-1'
           key={el.name}

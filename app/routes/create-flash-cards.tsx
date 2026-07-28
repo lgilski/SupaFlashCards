@@ -11,7 +11,7 @@ export async function loader({ context }: Route.LoaderArgs) {
   return { isAnonymous: user?.is_anonymous ?? false };
 }
 
-export async function action({ request, context }: Route.ActionArgs) {
+export async function action({ request }: Route.ActionArgs) {
   let formData = await request.formData();
   let name = formData.get('name');
 
