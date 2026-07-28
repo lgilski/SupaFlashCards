@@ -19,12 +19,12 @@ export default function Home() {
           Here you can create "supa" flash cards so you can learn how you like
           :)
         </p>
-        <Link
+        {/* <Link
           className='px-4 py-2 bg-teal-600 text-teal-050 text-lg rounded-lg'
           to={'dashboard'}
         >
           Go to dashboard
-        </Link>
+        </Link> */}
       </div>
     </section>
   );

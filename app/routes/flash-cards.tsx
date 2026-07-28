@@ -4,6 +4,8 @@ import { getServerClient } from '~/utils/supabase.server';
 import type { Route } from './+types/flash-cards';
 import { userContext } from '~/context';
 
+// Add here a anonymous user functionality
+
 function shuffle(array: any[]) {
   const arrayToShufle = structuredClone(array);
   let currentIndex = arrayToShufle.length;

@@ -47,11 +47,33 @@ export default function doLogin({ loaderData }: Route.ComponentProps) {
     }
   }
 
+  async function loginAnonymously(event: React.SubmitEvent) {
+    event.preventDefault();
+
+    const supabase = createBrowserClient(
+      env.SUPABASE_URL,
+      env.SUPABASE_PUBLISHABLE_KEY,
+    );
+
+    const { data, error } = await supabase.auth.signInAnonymously();
+
+    console.log(data, error);
+
+    if (data.session) {
+      navigate('/dashboard');
+    }
+  }
+
   return (
-    <Form method='post' onSubmit={doLogin}>
-      <input name='email' id='email' placeholder='Enter email' />
-      <input name='password' id='password' placeholder='Enter password' />
-      <button type='submit'>Submit</button>
-    </Form>
+    <>
+      <Form method='post' onSubmit={doLogin}>
+        <input name='email' id='email' placeholder='Enter email' />
+        <input name='password' id='password' placeholder='Enter password' />
+        <button type='submit'>Submit</button>
+      </Form>
+      <Form method='post' onSubmit={loginAnonymously}>
+        <button type='submit'>Log in anonymously</button>
+      </Form>
+    </>
   );
 }

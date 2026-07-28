@@ -22,6 +22,7 @@ export default function Sidebar({ loaderData }: Route.ComponentProps) {
         <div className='flex gap-8'>
           {user ? (
             <>
+              <Link to={'/dashboard'}>Go to dashboard</Link>
               <Link to={'/flash-cards/create'}>Create flash cards</Link>
               <Link to={'/logout'}>Log out</Link>
             </>

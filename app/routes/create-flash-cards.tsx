@@ -1,15 +1,17 @@
 import { Form, redirect } from 'react-router';
 import type { Route } from './+types/create-flash-cards';
-import { useState } from 'react';
+import { useState, type SubmitEvent } from 'react';
 import { getServerClient } from '~/utils/supabase.server';
+import { userContext } from '~/context';
 
 // TODO: implement form checks before submiting. Give feedback to the user. Handle empty inputs.
 
 export async function loader({ context }: Route.LoaderArgs) {
-  return null;
+  const user = context.get(userContext);
+  return { isAnonymous: user?.is_anonymous ?? false };
 }
 
-export async function action({ request }: Route.ActionArgs) {
+export async function action({ request, context }: Route.ActionArgs) {
   let formData = await request.formData();
   let name = formData.get('name');
 
@@ -37,11 +39,13 @@ export async function action({ request }: Route.ActionArgs) {
 
   await supabase.from('cards').insert(flashcards);
 
-  return redirect('/flash-cards/' + name);
+  return redirect('/flash-cards/' + newCategoryData.id);
 }
 
 let id = 1;
-export default function CreateFlashCards() {
+export default function CreateFlashCards({ loaderData }: Route.ComponentProps) {
+  const { isAnonymous } = loaderData;
+
   const [currentFlashCards, setCurrentFlashCards] = useState<
     { id: string; question: string; answer: string }[]
   >([{ id: '0', question: '', answer: '' }]);
@@ -68,8 +72,41 @@ export default function CreateFlashCards() {
     );
   }
 
+  function handleSubmit(event: SubmitEvent) {
+    if (!isAnonymous) return; // let the Form submit normally to the server action
+
+    event.preventDefault();
+
+    const formData = new FormData(event.currentTarget);
+    const name = formData.get('name');
+
+    const categoryId = crypto.randomUUID();
+
+    const ids = new Set<string>();
+    for (const key of formData.keys()) {
+      const match = key.match(/^(question|answer)-(\d+)$/);
+      if (match) ids.add(match[2]);
+    }
+
+    const flashcards = [...ids].map(id => ({
+      question: formData.get(`question-${id}`) as string,
+      answer: formData.get(`answer-${id}`) as string,
+    }));
+
+    const categories = JSON.parse(localStorage.getItem('categories') ?? '[]');
+    const cards = JSON.parse(localStorage.getItem('cards') ?? '{}');
+
+    categories.push({ id: categoryId, name });
+    cards[categoryId] = flashcards;
+
+    localStorage.setItem('categories', JSON.stringify(categories));
+    localStorage.setItem('cards', JSON.stringify(cards));
+
+    window.location.href = `/flash-cards/${categoryId}`;
+  }
+
   return (
-    <Form method='post' className='max-w-5xl mx-auto'>
+    <Form method='post' onSubmit={handleSubmit} className='max-w-5xl mx-auto'>
       <div className='inline-flex flex-col'>
         <label htmlFor='name'>Category name</label>
         <input className='bg-teal-100' id='name' name='name' type='text' />
