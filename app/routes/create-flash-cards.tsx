@@ -1,4 +1,4 @@
-import { Form, redirect } from 'react-router';
+import { Form, redirect, useNavigate } from 'react-router';
 import type { Route } from './+types/create-flash-cards';
 import { useState, type SubmitEvent } from 'react';
 import { getServerClient } from '~/utils/supabase.server';
@@ -45,6 +45,8 @@ export async function action({ request }: Route.ActionArgs) {
 let id = 1;
 export default function CreateFlashCards({ loaderData }: Route.ComponentProps) {
   const { isAnonymous } = loaderData;
+
+  const navigate = useNavigate();
 
   const [currentFlashCards, setCurrentFlashCards] = useState<
     { id: string; question: string; answer: string }[]
@@ -102,7 +104,7 @@ export default function CreateFlashCards({ loaderData }: Route.ComponentProps) {
     localStorage.setItem('categories', JSON.stringify(categories));
     localStorage.setItem('cards', JSON.stringify(cards));
 
-    window.location.href = `/flash-cards/${categoryId}`;
+    navigate('/flash-cards/' + categoryId);
   }
 
   return (

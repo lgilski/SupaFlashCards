@@ -1,11 +1,22 @@
-import { Link } from 'react-router';
+import { Link, redirect } from 'react-router';
 import type { Route } from './+types/home';
+import { getServerClient } from '~/utils/supabase.server';
 
 export function meta({}: Route.MetaArgs) {
   return [
     { title: 'New React Router App' },
     { name: 'description', content: 'Welcome to React Router!' },
   ];
+}
+
+export async function loader({ request }: Route.LoaderArgs) {
+  const { supabase } = getServerClient(request);
+
+  const { data } = await supabase.auth.getUser();
+
+  if (data.user) return redirect('/dashboard');
+
+  return null;
 }
 
 export default function Home() {

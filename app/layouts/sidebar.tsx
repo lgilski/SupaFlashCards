@@ -15,11 +15,11 @@ export default function Sidebar({ loaderData }: Route.ComponentProps) {
 
   return (
     <>
-      <nav className='flex items-baseline justify-between px-4 py-2'>
-        <Link to={'/'} className='font-semibold text-2xl'>
+      <nav className='flex items-baseline justify-between px-4 py-2 bg-white'>
+        <Link to={user ? '/dashboard' : '/'} className='font-semibold text-2xl'>
           <span className='text-teal-600'>Supa</span>FlashCards
         </Link>
-        <div className='flex gap-8'>
+        <div className='flex gap-8 text-blue-grey-700'>
           {user ? (
             <>
               <Link to={'/dashboard'}>Go to dashboard</Link>

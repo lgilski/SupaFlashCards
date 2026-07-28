@@ -1,4 +1,4 @@
-import { Form, redirect } from 'react-router';
+import { Form, redirect, useNavigate } from 'react-router';
 import type { Route } from './+types/edit-flash-cards';
 import { useRef, useState, type SubmitEvent } from 'react';
 import { getServerClient } from '~/utils/supabase.server';
@@ -139,6 +139,7 @@ export default function EditFlashCards({
   params,
 }: Route.ComponentProps) {
   const { isAnonymous } = loaderData;
+  const navigate = useNavigate();
 
   const [currentFlashCards, setCurrentFlashCards] = useState<
     { id: string; question: string; answer: string }[]
@@ -206,7 +207,7 @@ export default function EditFlashCards({
     localStorage.setItem('categories', JSON.stringify(updatedCategories));
     localStorage.setItem('cards', JSON.stringify(cards));
 
-    window.location.href = `/flash-cards/${params.id}`;
+    navigate('/flash-cards/' + params.id);
   }
 
   return (
