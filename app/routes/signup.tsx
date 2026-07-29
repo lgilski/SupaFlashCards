@@ -1,46 +1,94 @@
-import { Form, redirect, useNavigation } from 'react-router';
+import { data, Form, redirect, useNavigation } from 'react-router';
 import type { Route } from './+types/signup';
 import { getServerClient } from '~/utils/supabase.server';
-import { useEffect, useState } from 'react';
+import { useState, type SubmitEvent } from 'react';
+
+export async function loader({ request }: Route.LoaderArgs) {
+  const { supabase } = getServerClient(request);
+  const userResponse = await supabase.auth.getUser();
+
+  if (userResponse?.data?.user) {
+    throw redirect('/dashboard');
+  }
+
+  return null;
+}
 
 export async function action({ request }: Route.ActionArgs) {
-  const { supabase } = getServerClient(request);
+  const { supabase, headers } = getServerClient(request);
 
   const formData = await request.formData();
   const email = formData.get('email') as string;
   const password = formData.get('password') as string;
 
-  const { data, error } = await supabase.auth.signUp({
+  const { data: supabaseData, error } = await supabase.auth.signUp({
     email,
     password,
   });
 
-  // Handle a situation when the user already exists
   if (error) {
-    throw error;
+    return data({ error: error.message }, { headers });
   }
 
-  return redirect('/login');
+  if (supabaseData.user && supabaseData.user.identities?.length === 0) {
+    return data(
+      {
+        error:
+          'An account with this email already exists. Try logging in instead.',
+      },
+      { headers },
+    );
+  }
+
+  if (!supabaseData.session) {
+    return data(
+      { error: 'Check your email to confirm your account.' },
+      { headers },
+    );
+  }
+
+  return redirect('/login', { headers });
 }
 
 export default function SignUp({ actionData }: Route.ComponentProps) {
-  const [errorMessage, setErrorMessage] = useState();
+  const [clientError, setClientError] = useState('');
+  const [dismissedServerError, setDismissedServerError] = useState(false);
 
   const navigation = useNavigation();
   const isSubmitting = navigation.state === 'submitting';
 
-  // Give feedback to the user. React to changes. Show, hide and change error messages
+  const serverError = dismissedServerError ? null : actionData?.error;
+  const errorMessage = clientError || serverError;
 
-  // password check etc
-  function handleSubmit() {}
+  function handleChange() {
+    if (dismissedServerError) return;
+    setDismissedServerError(true);
+  }
 
-  // useEffect(() => {
-  //   if (actionData) setErrorMessage(actionData);
-  // }, [actionData, setErrorMessage]);
+  function handleSubmit(event: SubmitEvent<HTMLFormElement>) {
+    setClientError('');
+    setDismissedServerError(false);
+
+    const formData = new FormData(event.currentTarget);
+    const password = formData.get('password');
+    const repeatPassword = formData.get('repeat-password');
+
+    if (repeatPassword !== password) {
+      event.preventDefault();
+      setClientError('Passwords do not match');
+    }
+  }
 
   return (
     <div className='flex flex-col mx-auto max-w-md bg-teal-200 rounded-md py-4 px-8 mt-30 shadow-md'>
       <h1 className='text-2xl text-center mb-4'>Sign up</h1>
+
+      {errorMessage && (
+        <p className='text-red-600 text-sm text-center mb-2' role='alert'>
+          {errorMessage}
+        </p>
+      )}
+
       <Form
         className='flex flex-col gap-4'
         method='post'
@@ -49,6 +97,7 @@ export default function SignUp({ actionData }: Route.ComponentProps) {
         <fieldset className='flex flex-col'>
           <label htmlFor='email'>Email</label>
           <input
+            onChange={handleChange}
             className='bg-teal-050 rounded-md px-2 py-1 inset-shadow-sm'
             name='email'
             id='email'
@@ -58,6 +107,7 @@ export default function SignUp({ actionData }: Route.ComponentProps) {
         <fieldset className='flex flex-col'>
           <label htmlFor='password'>Password</label>
           <input
+            onChange={handleChange}
             className='bg-teal-050 rounded-md px-2 py-1 inset-shadow-sm'
             name='password'
             id='password'
@@ -68,6 +118,7 @@ export default function SignUp({ actionData }: Route.ComponentProps) {
         <fieldset className='flex flex-col'>
           <label htmlFor='repeat-password'>Repeat password</label>
           <input
+            onChange={handleChange}
             className='bg-teal-050 rounded-md px-2 py-1 inset-shadow-sm'
             name='repeat-password'
             id='repeat-password'
