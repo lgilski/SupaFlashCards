@@ -1,9 +1,8 @@
 import { Form, redirect, useNavigate } from 'react-router';
 import type { Route } from './+types/edit-flash-cards';
-import { useRef, useState, type SubmitEvent } from 'react';
+import { useRef, useState, type MouseEvent, type SubmitEvent } from 'react';
 import { getServerClient } from '~/utils/supabase.server';
 import { userContext } from '~/context';
-import { cardsData } from '~/data';
 
 export async function loader({ params, request, context }: Route.LoaderArgs) {
   const user = context.get(userContext);
@@ -50,21 +49,39 @@ export async function clientLoader({
 
 clientLoader.hydrate = true as const;
 
+// Add cool loading spinner
 export function HydrateFallback() {
   return <div>Loading...</div>;
 }
 
 export async function action({ params, request }: Route.ActionArgs) {
   const { supabase } = getServerClient(request);
+  const formData = await request.formData();
+  const newName = formData.get('name');
+
+  console.log(formData.get('delete'));
+
+  if (formData.get('delete') === 'delete-category') {
+    const { error: cardsError } = await supabase
+      .from('cards')
+      .delete()
+      .eq('category_id', params.id);
+    if (cardsError) console.error('delete cards error:', cardsError);
+
+    const { error: categoryError } = await supabase
+      .from('categories')
+      .delete()
+      .eq('id', params.id);
+    if (categoryError) console.error('delete category error:', categoryError);
+
+    return redirect('/dashboard');
+  }
 
   const { data: categoryData } = await supabase
     .from('categories')
     .select()
     .eq('id', params.id)
     .single();
-
-  const formData = await request.formData();
-  const newName = formData.get('name');
 
   if (newName !== categoryData.name) {
     await supabase
@@ -185,6 +202,34 @@ export default function EditFlashCards({
     }
   }
 
+  function handleDeleteCategory(event: MouseEvent<HTMLButtonElement>) {
+    // Insted of that add confirmation modal
+    const confirmed = window.confirm(
+      'Are you sure you want to delete this category and all its flashcards? This cannot be undone.',
+    );
+    if (!confirmed) {
+      event.preventDefault();
+      return;
+    }
+
+    if (!isAnonymous) return; // if the user is logged in and confirmed the deletion, go to action (do stuff on server), when anonymous delete locally
+
+    event.preventDefault();
+
+    const categories = JSON.parse(localStorage.getItem('categories') ?? '[]');
+    const cards = JSON.parse(localStorage.getItem('cards') ?? '{}');
+
+    const updatedCategories = categories.filter(
+      (el: any) => el.id !== params.id,
+    );
+    delete cards[params.id!];
+
+    localStorage.setItem('categories', JSON.stringify(updatedCategories));
+    localStorage.setItem('cards', JSON.stringify(cards));
+
+    navigate('/dashboard');
+  }
+
   function handleSubmit(event: SubmitEvent<HTMLFormElement>) {
     if (!isAnonymous) return;
     event.preventDefault();
@@ -211,13 +256,19 @@ export default function EditFlashCards({
   }
 
   return (
-    <Form method='post' onSubmit={handleSubmit}>
+    <Form
+      method='post'
+      onSubmit={handleSubmit}
+      className='max-w-5xl mx-auto flex flex-col bg-white rounded-md py-4 px-8 my-30 shadow-md'
+    >
       <div className='inline-flex flex-col'>
         <label htmlFor='name'>Category name</label>
         <input
-          className='bg-teal-100'
+          className='bg-blue-grey-050 rounded-md px-2 py-1 inset-shadow-sm'
+          id='name'
           name='name'
           type='text'
+          autoComplete='off'
           defaultValue={loaderData.categoryName}
         />
       </div>
@@ -227,47 +278,85 @@ export default function EditFlashCards({
         <input key={id} type='hidden' name='deletedIds' value={id} />
       ))}
 
-      <div className='flex flex-col gap-4'>
+      <div className='flex flex-col gap-4 mt-4'>
         {currentFlashCards.map((flashCard, index) => (
-          <fieldset key={flashCard.id} className='flex'>
-            <legend>Flash card number {index + 1}</legend>
-            <div>
-              <label htmlFor={`question-${flashCard.id}`}>Question</label>
-              <input
-                className='bg-teal-100'
-                name={`question-${flashCard.id}`}
-                id={`question-${flashCard.id}`}
-                value={flashCard.question}
-                onChange={e =>
-                  updateFlashCard(
-                    flashCard.id,
-                    'question',
-                    e.currentTarget.value,
-                  )
-                }
-              />
-            </div>
-            <div>
-              <label htmlFor={`answer-${flashCard.id}`}>Answer</label>
-              <input
-                className='bg-teal-100'
-                name={`answer-${flashCard.id}`}
-                id={`answer-${flashCard.id}`}
-                value={flashCard.answer}
-                onChange={e =>
-                  updateFlashCard(flashCard.id, 'answer', e.currentTarget.value)
-                }
-              />
-            </div>
-            <button type='button' onClick={() => removeFlashCard(flashCard.id)}>
+          <div
+            key={flashCard.id}
+            className='flex justify-between items-end gap-32'
+          >
+            <fieldset className='w-full'>
+              <legend>Flash card number {index + 1}</legend>
+              <div className='flex gap-4'>
+                <div className='flex flex-col w-full'>
+                  <label htmlFor={`question-${flashCard.id}`}>Question</label>
+                  <input
+                    className='bg-blue-grey-050 rounded-md px-2 py-1 inset-shadow-sm w-full'
+                    name={`question-${flashCard.id}`}
+                    id={`question-${flashCard.id}`}
+                    value={flashCard.question}
+                    autoComplete='off'
+                    onChange={e =>
+                      updateFlashCard(
+                        flashCard.id,
+                        'question',
+                        e.currentTarget.value,
+                      )
+                    }
+                  />
+                </div>
+                <div className='flex flex-col w-full'>
+                  <label htmlFor={`answer-${flashCard.id}`}>Answer</label>
+                  <input
+                    className='bg-blue-grey-050 rounded-md px-2 py-1 inset-shadow-sm w-full'
+                    name={`answer-${flashCard.id}`}
+                    id={`answer-${flashCard.id}`}
+                    value={flashCard.answer}
+                    autoComplete='off'
+                    onChange={e =>
+                      updateFlashCard(
+                        flashCard.id,
+                        'answer',
+                        e.currentTarget.value,
+                      )
+                    }
+                  />
+                </div>
+              </div>
+            </fieldset>
+            <button
+              className='text-red-500 bg-red-050 rounded-md px-2 py-1 duration-150 hover:bg-red-100 cursor-pointer w-60'
+              type='button'
+              onClick={() => removeFlashCard(flashCard.id)}
+            >
               Remove flash card
             </button>
-          </fieldset>
+          </div>
         ))}
-        <button type='button' onClick={addFlashCard}>
-          Add flash card
-        </button>
-        <button type='submit'>Submit</button>
+
+        <div className='flex gap-4 mt-4'>
+          <button
+            className='text-lg font-medium text-blue-800 bg-blue-050 px-4 py-2 rounded-md cursor-pointer duration-150 hover:bg-blue-100'
+            type='button'
+            onClick={addFlashCard}
+          >
+            Add flash card
+          </button>
+          <button
+            className='text-lg font-medium text-teal-050 bg-teal-600 px-4 py-2 rounded-md cursor-pointer duration-150 hover:bg-teal-500'
+            type='submit'
+          >
+            Submit
+          </button>
+          <button
+            className='text-lg font-medium text-red-050 bg-red-600 px-4 py-2 rounded-md cursor-pointer duration-150 hover:bg-red-500'
+            type='submit'
+            name='delete'
+            value='delete-category'
+            onClick={handleDeleteCategory}
+          >
+            Delete category
+          </button>
+        </div>
       </div>
     </Form>
   );

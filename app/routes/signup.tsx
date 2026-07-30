@@ -21,16 +21,18 @@ export async function action({ request }: Route.ActionArgs) {
   const email = formData.get('email') as string;
   const password = formData.get('password') as string;
 
-  const { data: supabaseData, error } = await supabase.auth.signUp({
+  const { data: signUpData, error } = await supabase.auth.signUp({
     email,
     password,
   });
 
+  // Passing headers because of the cookies provided by supabase auth
   if (error) {
     return data({ error: error.message }, { headers });
   }
 
-  if (supabaseData.user && supabaseData.user.identities?.length === 0) {
+  // When account already exists the identities length is equal to zero
+  if (signUpData.user && signUpData.user.identities?.length === 0) {
     return data(
       {
         error:
@@ -40,7 +42,7 @@ export async function action({ request }: Route.ActionArgs) {
     );
   }
 
-  if (!supabaseData.session) {
+  if (!signUpData.session) {
     return data(
       { error: 'Check your email to confirm your account.' },
       { headers },
@@ -52,22 +54,23 @@ export async function action({ request }: Route.ActionArgs) {
 
 export default function SignUp({ actionData }: Route.ComponentProps) {
   const [clientError, setClientError] = useState('');
-  const [dismissedServerError, setDismissedServerError] = useState(false);
+  const [showServerError, setShowServerError] = useState(true);
 
   const navigation = useNavigation();
   const isSubmitting = navigation.state === 'submitting';
 
-  const serverError = dismissedServerError ? null : actionData?.error;
+  const serverError = showServerError ? actionData?.error : null;
+
   const errorMessage = clientError || serverError;
 
   function handleChange() {
-    if (dismissedServerError) return;
-    setDismissedServerError(true);
+    if (!showServerError) return;
+    setShowServerError(false);
   }
 
   function handleSubmit(event: SubmitEvent<HTMLFormElement>) {
     setClientError('');
-    setDismissedServerError(false);
+    setShowServerError(true);
 
     const formData = new FormData(event.currentTarget);
     const password = formData.get('password');
@@ -130,6 +133,7 @@ export default function SignUp({ actionData }: Route.ComponentProps) {
           className='text-lg font-medium text-teal-050
            bg-teal-600 px-4 py-2 rounded-md mt-2 cursor-pointer duration-150 hover:bg-teal-500'
           type='submit'
+          disabled={isSubmitting}
         >
           {isSubmitting ? 'Submiting...' : 'Submit'}
         </button>

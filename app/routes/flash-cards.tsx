@@ -154,7 +154,7 @@ export default function FlashCards({ loaderData }: Route.ComponentProps) {
         onClick={() => setShowAnswer(prevState => !prevState)}
       >
         {showAnswer
-          ? `Odpowiedź: ${cardsToDisplay[currentCard].answer}`
+          ? `Answer: ${cardsToDisplay[currentCard].answer}`
           : cardsToDisplay[currentCard].question}
       </div>
       <div>

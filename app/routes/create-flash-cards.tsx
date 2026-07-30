@@ -5,6 +5,7 @@ import { getServerClient } from '~/utils/supabase.server';
 import { userContext } from '~/context';
 
 // TODO: implement form checks before submiting. Give feedback to the user. Handle empty inputs.
+// implement the design
 
 export async function loader({ context }: Route.LoaderArgs) {
   const user = context.get(userContext);
@@ -108,66 +109,92 @@ export default function CreateFlashCards({ loaderData }: Route.ComponentProps) {
   }
 
   return (
-    <Form method='post' onSubmit={handleSubmit} className='max-w-5xl mx-auto'>
+    <Form
+      method='post'
+      onSubmit={handleSubmit}
+      className='max-w-5xl mx-auto flex flex-col bg-white rounded-md py-4 px-8 my-30 shadow-md'
+    >
       <div className='inline-flex flex-col'>
         <label htmlFor='name'>Category name</label>
-        <input className='bg-teal-100' id='name' name='name' type='text' />
+        <input
+          className='bg-blue-grey-050 rounded-md px-2 py-1 inset-shadow-sm'
+          id='name'
+          name='name'
+          type='text'
+          autoComplete='off'
+        />
       </div>
       <div className='flex flex-col gap-4 mt-4'>
         {currentFlashCards.map((flashCard, index) => (
-          <fieldset key={flashCard.id} className='flex justify-between'>
-            <legend>Flash card number {index + 1}</legend>
-            <div className='flex gap-4'>
-              <div className='flex flex-col'>
-                <label htmlFor={`question-${flashCard.id}`}>Question</label>
-                <input
-                  className='bg-teal-100'
-                  name={`question-${flashCard.id}`}
-                  id={`question-${flashCard.id}`}
-                  value={flashCard.question}
-                  onChange={e =>
-                    updateFlashCard(
-                      flashCard.id,
-                      'question',
-                      e.currentTarget.value,
-                    )
-                  }
-                />
+          <div
+            key={flashCard.id}
+            className='flex justify-between items-end gap-32'
+          >
+            <fieldset className='w-full'>
+              <legend>Flash card number {index + 1}</legend>
+              <div className='flex gap-4'>
+                <div className='flex flex-col w-full'>
+                  <label htmlFor={`question-${flashCard.id}`}>Question</label>
+                  <input
+                    className='bg-blue-grey-050 rounded-md px-2 py-1 inset-shadow-sm w-full'
+                    name={`question-${flashCard.id}`}
+                    id={`question-${flashCard.id}`}
+                    value={flashCard.question}
+                    autoComplete='off'
+                    onChange={e =>
+                      updateFlashCard(
+                        flashCard.id,
+                        'question',
+                        e.currentTarget.value,
+                      )
+                    }
+                  />
+                </div>
+                <div className='flex flex-col w-full'>
+                  <label htmlFor={`answer-${flashCard.id}`}>Answer</label>
+                  <input
+                    className='bg-blue-grey-050 rounded-md px-2 py-1 inset-shadow-sm w-full'
+                    name={`answer-${flashCard.id}`}
+                    id={`answer-${flashCard.id}`}
+                    value={flashCard.answer}
+                    autoComplete='off'
+                    onChange={e =>
+                      updateFlashCard(
+                        flashCard.id,
+                        'answer',
+                        e.currentTarget.value,
+                      )
+                    }
+                  />
+                </div>
               </div>
-              <div className='flex flex-col'>
-                <label htmlFor={`answer-${flashCard.id}`}>Answer</label>
-                <input
-                  className='bg-teal-100'
-                  name={`answer-${flashCard.id}`}
-                  id={`answer-${flashCard.id}`}
-                  value={flashCard.answer}
-                  onChange={e =>
-                    updateFlashCard(
-                      flashCard.id,
-                      'answer',
-                      e.currentTarget.value,
-                    )
-                  }
-                />
-              </div>
-            </div>
+            </fieldset>
             <button
-              className='text-red-500'
+              className='text-red-500 bg-red-050 rounded-md px-2 py-1 duration-150 hover:bg-red-100 cursor-pointer w-60'
               type='button'
               onClick={() => removeFlashCard(flashCard.id)}
             >
               Remove flash card
             </button>
-          </fieldset>
+          </div>
         ))}
-        <button
-          className='mx-auto bg-teal-100'
-          type='button'
-          onClick={addFlashCard}
-        >
-          Add flash card
-        </button>
-        <button type='submit'>Submit</button>
+
+        <div className='flex gap-4 mt-4'>
+          <button
+            className='text-lg font-medium text-blue-800 bg-blue-050 px-4 py-2 rounded-md cursor-pointer duration-150 hover:bg-blue-100'
+            // className='text-lg font-medium text-blue-grey-800 bg-blue-grey-050 px-4 py-2 rounded-md cursor-pointer duration-150 hover:bg-blue-grey-100'
+            type='button'
+            onClick={addFlashCard}
+          >
+            Add flash card
+          </button>
+          <button
+            className='text-lg font-medium text-teal-050 bg-teal-600 px-4 py-2 rounded-md cursor-pointer duration-150 hover:bg-teal-500'
+            type='submit'
+          >
+            Submit
+          </button>
+        </div>
       </div>
     </Form>
   );

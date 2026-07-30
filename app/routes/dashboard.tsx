@@ -2,7 +2,6 @@ import { getServerClient } from '~/utils/supabase.server';
 import type { Route } from './+types/dashboard';
 import { Link } from 'react-router';
 import { userContext } from '~/context';
-import { useEffect, useState } from 'react';
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -45,18 +44,22 @@ export default function Home({ loaderData }: Route.ComponentProps) {
   const { data: categories, userEmail } = loaderData;
 
   return (
-    <section className='max-w-7xl mx-auto grid grid-cols-3 gap-8 pt-16 content-center'>
-      <div>Welcome {userEmail}</div>
+    <section className='max-w-7xl mx-auto pt-16'>
+      <h3 className='text-center text-xl'>
+        Welcome {userEmail ? userEmail : 'Guest'}
+      </h3>
       {/* Add graphics for each category/group?? */}
-      {categories?.map(el => (
-        <Link
-          className='bg-teal-200 px-4 py-2 h-32 items-center justify-center flex text-xl rounded-xl transition-all duration-200 hover:-translate-y-1'
-          key={el.name}
-          to={`/flash-cards/${el.id}`}
-        >
-          {el.name}
-        </Link>
-      ))}
+      <div className='grid grid-cols-3 gap-8 content-center bg-white rounded-md py-4 px-8 my-4 shadow-md'>
+        {categories?.map(el => (
+          <Link
+            className='bg-teal-200 px-4 py-2 h-32 items-center justify-center flex text-xl rounded-xl transition-all duration-200 hover:-translate-y-1'
+            key={el.name}
+            to={`/flash-cards/${el.id}`}
+          >
+            {el.name}
+          </Link>
+        ))}
+      </div>
     </section>
   );
 }
