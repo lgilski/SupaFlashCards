@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import { describe, expect, test } from 'vitest';
 import { createRoutesStub } from 'react-router';
-import Sidebar from './sidebar';
+import Sidebar from './navigation';
 
 describe('Sidebar', () => {
   test('renders', () => {

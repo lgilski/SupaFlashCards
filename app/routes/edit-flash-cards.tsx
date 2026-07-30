@@ -4,6 +4,8 @@ import { useRef, useState, type MouseEvent, type SubmitEvent } from 'react';
 import { getServerClient } from '~/utils/supabase.server';
 import { userContext } from '~/context';
 
+// Check if the name is already used by other group
+
 export async function loader({ params, request, context }: Route.LoaderArgs) {
   const user = context.get(userContext);
 
@@ -91,7 +93,7 @@ export async function action({ params, request }: Route.ActionArgs) {
       .eq('id', +params.id);
   }
 
-  // Usunięcie kart
+  // Delete flash cards
   const deletedIds = formData.getAll('deletedIds').map(Number);
   if (deletedIds.length > 0) {
     const { error } = await supabase
@@ -101,14 +103,14 @@ export async function action({ params, request }: Route.ActionArgs) {
     if (error) console.error('delete error:', error);
   }
 
-  // składanie pytań i odpowiedzi w pary
+  // asembling questions and answers into pairs
   const ids = new Set<string>();
   for (const key of formData.keys()) {
     const match = key.match(/^(question|answer)-(.+)$/);
     if (match) ids.add(match[2]);
   }
 
-  // Rozdzielenie pomiędzy elementami do aktualizacji a elementami do dodania
+  // divide elements into those to add and those to update
   const toUpdate: {
     id: number;
     group_id: number;
@@ -130,7 +132,7 @@ export async function action({ params, request }: Route.ActionArgs) {
     }
   }
 
-  // Zaktualizuj istniejące karty
+  // Update existing cards
   if (toUpdate.length > 0) {
     for (const card of toUpdate) {
       const { id, ...fields } = card;
@@ -142,7 +144,7 @@ export async function action({ params, request }: Route.ActionArgs) {
     }
   }
 
-  // Dodaj nowe karty
+  // Add new cards
   if (toInsert.length > 0) {
     const { error } = await supabase.from('cards').insert(toInsert);
     if (error) console.error('insert error:', error);
@@ -167,12 +169,11 @@ export default function EditFlashCards({
   );
   const [deletedIds, setDeletedIds] = useState<string[]>([]);
 
-  // początkowe id jest zgodne z tym z bazy danych
+  // initial id is equal to those in db
   const initialIds = useRef(
     new Set(loaderData?.cardsData?.map((card: any) => card.id) ?? []),
   );
 
-  // Generowanie tymczasowych id dla nowych elementów
   const nextTempId = useRef(0);
 
   function addFlashCard() {
@@ -195,8 +196,8 @@ export default function EditFlashCards({
     setCurrentFlashCards(prevState =>
       prevState.filter(flashCard => flashCard.id !== id),
     );
-    // zapamiętać do usunięcia tylko te karty, które już są w bazie.
-    // Nowo stworzone elementy jeszcze nie zostały dodane, także nie ma potrzeby zapisania tego.
+    // save only those cards to delete which are already in db
+    // new ones aren't in db, so there no need for them
     if (initialIds.current.has(id)) {
       setDeletedIds(prev => [...prev, id]);
     }
@@ -283,7 +284,7 @@ export default function EditFlashCards({
         />
       </div>
 
-      {/* Ten input jest potrzebny, aby karty do usunięcia dotarły do action i aby móc je usunąc z bazy */}
+      {/* Those inputs are neccessary so the cards to delete can get to the action to delete them */}
       {deletedIds.map(id => (
         <input key={id} type='hidden' name='deletedIds' value={id} />
       ))}
@@ -334,11 +335,22 @@ export default function EditFlashCards({
               </div>
             </fieldset>
             <button
-              className='text-red-500 bg-red-050 rounded-md px-2 py-1 duration-150 hover:bg-red-100 cursor-pointer w-60'
+              className='text-red-500 rounded-md duration-150 p-1 hover:text-red-600 cursor-pointer w-min'
               type='button'
               onClick={() => removeFlashCard(flashCard.id)}
             >
-              Remove flash card
+              <svg
+                xmlns='http://www.w3.org/2000/svg'
+                viewBox='0 0 24 24'
+                fill='currentColor'
+                className='size-6'
+              >
+                <path
+                  fillRule='evenodd'
+                  d='M16.5 4.478v.227a48.816 48.816 0 0 1 3.878.512.75.75 0 1 1-.256 1.478l-.209-.035-1.005 13.07a3 3 0 0 1-2.991 2.77H8.084a3 3 0 0 1-2.991-2.77L4.087 6.66l-.209.035a.75.75 0 0 1-.256-1.478A48.567 48.567 0 0 1 7.5 4.705v-.227c0-1.564 1.213-2.9 2.816-2.951a52.662 52.662 0 0 1 3.369 0c1.603.051 2.815 1.387 2.815 2.951Zm-6.136-1.452a51.196 51.196 0 0 1 3.273 0C14.39 3.05 15 3.684 15 4.478v.113a49.488 49.488 0 0 0-6 0v-.113c0-.794.609-1.428 1.364-1.452Zm-.355 5.945a.75.75 0 1 0-1.5.058l.347 9a.75.75 0 1 0 1.499-.058l-.346-9Zm5.48.058a.75.75 0 1 0-1.498-.058l-.347 9a.75.75 0 0 0 1.5.058l.345-9Z'
+                  clipRule='evenodd'
+                />
+              </svg>
             </button>
           </div>
         ))}
@@ -352,7 +364,7 @@ export default function EditFlashCards({
             Add flash card
           </button>
           <button
-            className='text-lg font-medium text-teal-050 bg-teal-600 px-4 py-2 rounded-md cursor-pointer duration-150 hover:bg-teal-500'
+            className='text-lg font-medium text-teal-050 bg-teal-500 px-4 py-2 rounded-md cursor-pointer duration-150 hover:bg-teal-400'
             type='submit'
           >
             Submit

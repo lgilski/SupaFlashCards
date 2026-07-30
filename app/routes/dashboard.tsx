@@ -44,12 +44,29 @@ export default function Home({ loaderData }: Route.ComponentProps) {
   const { data: categories, userEmail } = loaderData;
 
   return (
-    <section className={`max-w-7xl mx-auto pt-16 ${!categories}`}>
+    <section className='max-w-7xl mx-auto pt-16'>
       <h3 className='text-center text-xl'>
         Welcome {userEmail ? userEmail : 'Guest'}
       </h3>
       {/* Add graphics for each category/group?? */}
-      <div className='grid grid-cols-3 gap-8 content-center bg-white rounded-md py-4 px-8 my-4 shadow-md'>
+      {/* min-h-155 */}
+      <div
+        className={` bg-white rounded-md py-4 px-8 my-4 shadow-md min-h-80 ${categories && categories.length < 1 ? 'flex flex-col items-center justify-center' : 'grid grid-cols-3 gap-8 '}`}
+      >
+        {categories && categories.length < 1 && (
+          <>
+            <h2 className='text-3xl font-semibold text-teal-900'>
+              There are no flash cards yet
+            </h2>
+            <p>You could try to create a new ones!</p>
+            <Link
+              to={'/flash-cards/create'}
+              className='font-medium text-teal-050 bg-teal-500 px-2 py-1 rounded-md cursor-pointer duration-150 hover:bg-teal-400 mt-4'
+            >
+              Create flash cards
+            </Link>
+          </>
+        )}
         {categories?.map(el => (
           <Link
             className='bg-teal-200 px-4 py-2 h-32 items-center justify-center flex text-xl rounded-xl transition-all duration-200 hover:-translate-y-1'

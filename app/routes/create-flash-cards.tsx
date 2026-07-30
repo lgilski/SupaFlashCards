@@ -1,11 +1,8 @@
-import { Form, redirect, useNavigate } from 'react-router';
+import { data, Form, redirect, useNavigate } from 'react-router';
 import type { Route } from './+types/create-flash-cards';
 import { useState, type SubmitEvent } from 'react';
 import { getServerClient } from '~/utils/supabase.server';
 import { userContext } from '~/context';
-
-// TODO: implement form checks before submiting. Give feedback to the user. Handle empty inputs.
-// implement the design
 
 export async function loader({ context }: Route.LoaderArgs) {
   const user = context.get(userContext);
@@ -13,10 +10,21 @@ export async function loader({ context }: Route.LoaderArgs) {
 }
 
 export async function action({ request }: Route.ActionArgs) {
+  // Add error handling
+
   let formData = await request.formData();
   let name = formData.get('name') as string;
 
   const { supabase } = getServerClient(request);
+
+  const { data: nameTaken, error: errorNameTaken } = await supabase
+    .from('flash-cards-group')
+    .select()
+    .eq('name', name);
+
+  if (nameTaken) {
+    return data({ error: 'This name is already used by other group.' });
+  }
 
   const { data: newCategoryData, error } = await supabase
     .from('flash-cards-group')
@@ -44,7 +52,18 @@ export async function action({ request }: Route.ActionArgs) {
 }
 
 let id = 1;
-export default function CreateFlashCards({ loaderData }: Route.ComponentProps) {
+export default function CreateFlashCards({
+  loaderData,
+  actionData,
+}: Route.ComponentProps) {
+  const [clientError, setClientError] = useState('');
+
+  // Change the naming here
+  const [showServerError, setShowServerError] = useState(true);
+
+  const serverError = showServerError ? actionData?.error : null;
+  const errorMessage = clientError || serverError;
+
   const { isAnonymous } = loaderData;
 
   const navigate = useNavigate();
@@ -76,12 +95,35 @@ export default function CreateFlashCards({ loaderData }: Route.ComponentProps) {
   }
 
   function handleSubmit(event: SubmitEvent<HTMLFormElement>) {
+    setClientError('');
+    setShowServerError(false);
+
+    const formData = new FormData(event.currentTarget);
+    const name = formData.get('name');
+
+    if (!name) {
+      event.preventDefault();
+      setClientError('The group has to have a name.');
+      setShowServerError(true);
+      return;
+    }
+
     if (!isAnonymous) return; // let the Form submit normally to the server action
 
     event.preventDefault();
 
-    const formData = new FormData(event.currentTarget);
-    const name = formData.get('name');
+    const categories = JSON.parse(
+      localStorage.getItem('flash-cards-group') ?? '[]',
+    );
+    const cards = JSON.parse(localStorage.getItem('cards') ?? '{}');
+
+    const nameTaken = categories.find((el: any) => el.name === name);
+
+    if (nameTaken) {
+      setClientError('This name is already used by other group.');
+      setShowServerError(true);
+      return;
+    }
 
     const categoryId = crypto.randomUUID();
 
@@ -95,11 +137,6 @@ export default function CreateFlashCards({ loaderData }: Route.ComponentProps) {
       question: formData.get(`question-${id}`) as string,
       answer: formData.get(`answer-${id}`) as string,
     }));
-
-    const categories = JSON.parse(
-      localStorage.getItem('flash-cards-group') ?? '[]',
-    );
-    const cards = JSON.parse(localStorage.getItem('cards') ?? '{}');
 
     categories.push({ id: categoryId, name });
     cards[categoryId] = flashcards;
@@ -116,6 +153,11 @@ export default function CreateFlashCards({ loaderData }: Route.ComponentProps) {
       onSubmit={handleSubmit}
       className='max-w-5xl mx-auto flex flex-col bg-white rounded-md py-4 px-8 my-30 shadow-md'
     >
+      {errorMessage && (
+        <p className='text-red-600 text-sm text-center mb-2' role='alert'>
+          {errorMessage}
+        </p>
+      )}
       <div className='inline-flex flex-col'>
         <label htmlFor='name'>Category name</label>
         <input
@@ -172,11 +214,22 @@ export default function CreateFlashCards({ loaderData }: Route.ComponentProps) {
               </div>
             </fieldset>
             <button
-              className='text-red-500 bg-red-050 rounded-md px-2 py-1 duration-150 hover:bg-red-100 cursor-pointer w-60'
+              className='text-red-500 rounded-md duration-150 p-1 hover:text-red-600 cursor-pointer w-min'
               type='button'
               onClick={() => removeFlashCard(flashCard.id)}
             >
-              Remove flash card
+              <svg
+                xmlns='http://www.w3.org/2000/svg'
+                viewBox='0 0 24 24'
+                fill='currentColor'
+                className='size-6'
+              >
+                <path
+                  fillRule='evenodd'
+                  d='M16.5 4.478v.227a48.816 48.816 0 0 1 3.878.512.75.75 0 1 1-.256 1.478l-.209-.035-1.005 13.07a3 3 0 0 1-2.991 2.77H8.084a3 3 0 0 1-2.991-2.77L4.087 6.66l-.209.035a.75.75 0 0 1-.256-1.478A48.567 48.567 0 0 1 7.5 4.705v-.227c0-1.564 1.213-2.9 2.816-2.951a52.662 52.662 0 0 1 3.369 0c1.603.051 2.815 1.387 2.815 2.951Zm-6.136-1.452a51.196 51.196 0 0 1 3.273 0C14.39 3.05 15 3.684 15 4.478v.113a49.488 49.488 0 0 0-6 0v-.113c0-.794.609-1.428 1.364-1.452Zm-.355 5.945a.75.75 0 1 0-1.5.058l.347 9a.75.75 0 1 0 1.499-.058l-.346-9Zm5.48.058a.75.75 0 1 0-1.498-.058l-.347 9a.75.75 0 0 0 1.5.058l.345-9Z'
+                  clipRule='evenodd'
+                />
+              </svg>
             </button>
           </div>
         ))}
@@ -184,14 +237,13 @@ export default function CreateFlashCards({ loaderData }: Route.ComponentProps) {
         <div className='flex gap-4 mt-4'>
           <button
             className='text-lg font-medium text-blue-800 bg-blue-050 px-4 py-2 rounded-md cursor-pointer duration-150 hover:bg-blue-100'
-            // className='text-lg font-medium text-blue-grey-800 bg-blue-grey-050 px-4 py-2 rounded-md cursor-pointer duration-150 hover:bg-blue-grey-100'
             type='button'
             onClick={addFlashCard}
           >
             Add flash card
           </button>
           <button
-            className='text-lg font-medium text-teal-050 bg-teal-600 px-4 py-2 rounded-md cursor-pointer duration-150 hover:bg-teal-500'
+            className='text-lg font-medium text-teal-050 bg-teal-500 px-4 py-2 rounded-md cursor-pointer duration-150 hover:bg-teal-400'
             type='submit'
           >
             Submit

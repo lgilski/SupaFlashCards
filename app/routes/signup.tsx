@@ -54,6 +54,8 @@ export async function action({ request }: Route.ActionArgs) {
 
 export default function SignUp({ actionData }: Route.ComponentProps) {
   const [clientError, setClientError] = useState('');
+
+  // Change the naming here
   const [showServerError, setShowServerError] = useState(true);
 
   const navigation = useNavigation();

@@ -1,5 +1,5 @@
 import { Link, Outlet } from 'react-router';
-import type { Route } from './+types/sidebar';
+import type { Route } from './+types/navigation';
 import { getServerClient } from '~/utils/supabase.server';
 
 export async function loader({ request }: Route.LoaderArgs) {
@@ -10,7 +10,7 @@ export async function loader({ request }: Route.LoaderArgs) {
   return { user: data.user };
 }
 
-export default function Sidebar({ loaderData }: Route.ComponentProps) {
+export default function Navigation({ loaderData }: Route.ComponentProps) {
   const { user } = loaderData;
 
   return (
