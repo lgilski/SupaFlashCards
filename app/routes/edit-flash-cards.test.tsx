@@ -132,7 +132,7 @@ describe('EditFlashCards', () => {
 //     mockedgetServerClient.mockReturnValue({
 //       supabase: {
 //         from: vi.fn(table =>
-//           table === 'categories' ? categoryBuilder : cardsBuilder,
+//           table === 'flash-cards-group' ? categoryBuilder : cardsBuilder,
 //         ),
 //       },
 //     } as never);
@@ -176,7 +176,7 @@ describe('EditFlashCards', () => {
 //     mockedgetServerClient.mockReturnValue({
 //       supabase: {
 //         from: vi.fn(table =>
-//           table === 'categories' ? categoryBuilder : cardsBuilder,
+//           table === 'flash-cards-group' ? categoryBuilder : cardsBuilder,
 //         ),
 //       },
 //     } as never);
@@ -197,13 +197,13 @@ describe('EditFlashCards', () => {
 //     expect(categoryUpdate).toHaveBeenCalledWith({ name: 'Biology' });
 //     expect(cardsDelete).toHaveBeenCalled();
 //     expect(cardsUpdate).toHaveBeenCalledWith({
-//       category_id: 'category-1',
+//       group_id: 'category-1',
 //       question: 'Updated question',
 //       answer: 'Updated answer',
 //     });
 //     expect(cardsInsert).toHaveBeenCalledWith([
 //       {
-//         category_id: 'category-1',
+//         group_id: 'category-1',
 //         question: 'New question',
 //         answer: 'New answer',
 //       },

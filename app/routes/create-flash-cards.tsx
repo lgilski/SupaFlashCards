@@ -14,12 +14,12 @@ export async function loader({ context }: Route.LoaderArgs) {
 
 export async function action({ request }: Route.ActionArgs) {
   let formData = await request.formData();
-  let name = formData.get('name');
+  let name = formData.get('name') as string;
 
   const { supabase } = getServerClient(request);
 
-  const { data: newCategoryData } = await supabase
-    .from('categories')
+  const { data: newCategoryData, error } = await supabase
+    .from('flash-cards-group')
     .insert({ name })
     .select()
     .single();
@@ -33,14 +33,14 @@ export async function action({ request }: Route.ActionArgs) {
   }
 
   const flashcards = [...ids].map(id => ({
-    category_id: newCategoryData.id,
-    question: formData.get(`question-${id}`),
-    answer: formData.get(`answer-${id}`),
+    group_id: newCategoryData!.id,
+    question: formData.get(`question-${id}`) as string,
+    answer: formData.get(`answer-${id}`) as string,
   }));
 
   await supabase.from('cards').insert(flashcards);
 
-  return redirect('/flash-cards/' + newCategoryData.id);
+  return redirect('/flash-cards/' + newCategoryData!.id);
 }
 
 let id = 1;
@@ -96,13 +96,15 @@ export default function CreateFlashCards({ loaderData }: Route.ComponentProps) {
       answer: formData.get(`answer-${id}`) as string,
     }));
 
-    const categories = JSON.parse(localStorage.getItem('categories') ?? '[]');
+    const categories = JSON.parse(
+      localStorage.getItem('flash-cards-group') ?? '[]',
+    );
     const cards = JSON.parse(localStorage.getItem('cards') ?? '{}');
 
     categories.push({ id: categoryId, name });
     cards[categoryId] = flashcards;
 
-    localStorage.setItem('categories', JSON.stringify(categories));
+    localStorage.setItem('flash-cards-group', JSON.stringify(categories));
     localStorage.setItem('cards', JSON.stringify(cards));
 
     navigate('/flash-cards/' + categoryId);

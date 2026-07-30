@@ -36,7 +36,7 @@ export async function loader({ params, request, context }: Route.LoaderArgs) {
   const { supabase } = getServerClient(request);
 
   const { data, error } = await supabase
-    .from('categories')
+    .from('flash-cards-group')
     .select(
       `
       id,
@@ -47,7 +47,7 @@ export async function loader({ params, request, context }: Route.LoaderArgs) {
         )
         `,
     )
-    .eq('id', params.id)
+    .eq('id', +params.id)
     .single();
 
   if (!data) {
@@ -66,7 +66,9 @@ export async function clientLoader({
 
   // anonymous — read from localStorage instead
   const cards = JSON.parse(localStorage.getItem('cards') ?? '{}');
-  const categories = JSON.parse(localStorage.getItem('categories') ?? '[]');
+  const categories = JSON.parse(
+    localStorage.getItem('flash-cards-group') ?? '[]',
+  );
   const category = categories.find((c: any) => c.id === params.id);
 
   return {

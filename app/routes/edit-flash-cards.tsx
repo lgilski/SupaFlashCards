@@ -12,15 +12,15 @@ export async function loader({ params, request, context }: Route.LoaderArgs) {
   const { supabase } = getServerClient(request);
 
   const { data: categoryData } = await supabase
-    .from('categories')
+    .from('flash-cards-group')
     .select()
-    .eq('id', params.id)
+    .eq('id', +params.id)
     .single();
 
   const { data: cardsData } = await supabase
     .from('cards')
     .select()
-    .eq('category_id', params.id);
+    .eq('group_id', +params.id);
 
   return {
     cardsData,
@@ -37,7 +37,9 @@ export async function clientLoader({
   if (serverData) return serverData;
 
   const cards = JSON.parse(localStorage.getItem('cards') ?? '{}');
-  const categories = JSON.parse(localStorage.getItem('categories') ?? '[]');
+  const categories = JSON.parse(
+    localStorage.getItem('flash-cards-group') ?? '[]',
+  );
   const category = categories.find((el: any) => el.id === params.id);
 
   return {
@@ -57,41 +59,40 @@ export function HydrateFallback() {
 export async function action({ params, request }: Route.ActionArgs) {
   const { supabase } = getServerClient(request);
   const formData = await request.formData();
-  const newName = formData.get('name');
+  const newName = formData.get('name') as string;
 
-  console.log(formData.get('delete'));
-
+  // If pressed the delete button
   if (formData.get('delete') === 'delete-category') {
     const { error: cardsError } = await supabase
       .from('cards')
       .delete()
-      .eq('category_id', params.id);
+      .eq('group_id', +params.id);
     if (cardsError) console.error('delete cards error:', cardsError);
 
     const { error: categoryError } = await supabase
-      .from('categories')
+      .from('flash-cards-group')
       .delete()
-      .eq('id', params.id);
+      .eq('id', +params.id);
     if (categoryError) console.error('delete category error:', categoryError);
 
     return redirect('/dashboard');
   }
 
   const { data: categoryData } = await supabase
-    .from('categories')
+    .from('flash-cards-group')
     .select()
-    .eq('id', params.id)
+    .eq('id', +params.id)
     .single();
 
-  if (newName !== categoryData.name) {
+  if (newName !== categoryData!.name) {
     await supabase
-      .from('categories')
+      .from('flash-cards-group')
       .update({ name: newName })
-      .eq('id', params.id);
+      .eq('id', +params.id);
   }
 
   // Usunięcie kart
-  const deletedIds = formData.getAll('deletedIds') as string[];
+  const deletedIds = formData.getAll('deletedIds').map(Number);
   if (deletedIds.length > 0) {
     const { error } = await supabase
       .from('cards')
@@ -109,24 +110,23 @@ export async function action({ params, request }: Route.ActionArgs) {
 
   // Rozdzielenie pomiędzy elementami do aktualizacji a elementami do dodania
   const toUpdate: {
-    id: string;
-    category_id: string;
+    id: number;
+    group_id: number;
     question: string;
     answer: string;
   }[] = [];
-  const toInsert: { category_id: string; question: string; answer: string }[] =
-    [];
+  const toInsert: { group_id: number; question: string; answer: string }[] = [];
 
   for (const id of ids) {
     const card = {
-      category_id: categoryData.id,
+      group_id: +categoryData!.id,
       question: formData.get(`question-${id}`) as string,
       answer: formData.get(`answer-${id}`) as string,
     };
     if (id.startsWith('new-')) {
       toInsert.push(card);
     } else {
-      toUpdate.push({ id, ...card });
+      toUpdate.push({ id: +id, ...card });
     }
   }
 
@@ -216,7 +216,9 @@ export default function EditFlashCards({
 
     event.preventDefault();
 
-    const categories = JSON.parse(localStorage.getItem('categories') ?? '[]');
+    const categories = JSON.parse(
+      localStorage.getItem('flash-cards-group') ?? '[]',
+    );
     const cards = JSON.parse(localStorage.getItem('cards') ?? '{}');
 
     const updatedCategories = categories.filter(
@@ -224,7 +226,10 @@ export default function EditFlashCards({
     );
     delete cards[params.id!];
 
-    localStorage.setItem('categories', JSON.stringify(updatedCategories));
+    localStorage.setItem(
+      'flash-cards-group',
+      JSON.stringify(updatedCategories),
+    );
     localStorage.setItem('cards', JSON.stringify(cards));
 
     navigate('/dashboard');
@@ -237,7 +242,9 @@ export default function EditFlashCards({
     const formData = new FormData(event.currentTarget);
     const newName = formData.get('name') as string;
 
-    const categories = JSON.parse(localStorage.getItem('categories') ?? '[]');
+    const categories = JSON.parse(
+      localStorage.getItem('flash-cards-group') ?? '[]',
+    );
     const cards = JSON.parse(localStorage.getItem('cards') ?? '{}');
 
     const updatedCategories = categories.map((el: any) =>
@@ -249,7 +256,10 @@ export default function EditFlashCards({
       answer,
     }));
 
-    localStorage.setItem('categories', JSON.stringify(updatedCategories));
+    localStorage.setItem(
+      'flash-cards-group',
+      JSON.stringify(updatedCategories),
+    );
     localStorage.setItem('cards', JSON.stringify(cards));
 
     navigate('/flash-cards/' + params.id);

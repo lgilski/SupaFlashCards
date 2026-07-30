@@ -3,6 +3,7 @@ import type { Route } from './+types/login';
 import { data, Form, redirect, useNavigate } from 'react-router';
 import { createBrowserClient } from '@supabase/ssr';
 import { useState, type SubmitEvent } from 'react';
+import type { Database } from '~/database.types';
 
 export async function loader({ request }: Route.LoaderArgs) {
   const { supabase, headers } = getServerClient(request);
@@ -38,7 +39,7 @@ export default function Login({ loaderData }: Route.ComponentProps) {
     const formData = new FormData(event.currentTarget);
     const dataFields = Object.fromEntries(formData.entries());
 
-    const supabase = createBrowserClient(
+    const supabase = createBrowserClient<Database>(
       env.SUPABASE_URL,
       env.SUPABASE_PUBLISHABLE_KEY,
     );
@@ -65,7 +66,7 @@ export default function Login({ loaderData }: Route.ComponentProps) {
     setErrorMessage(null);
     setIsSubmitting(true);
 
-    const supabase = createBrowserClient(
+    const supabase = createBrowserClient<Database>(
       env.SUPABASE_URL,
       env.SUPABASE_PUBLISHABLE_KEY,
     );

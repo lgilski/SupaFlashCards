@@ -16,7 +16,7 @@ export async function loader({ request, context }: Route.LoaderArgs) {
   if (user?.is_anonymous) return null;
 
   const { supabase } = getServerClient(request);
-  const { data, error } = await supabase.from('categories').select();
+  const { data, error } = await supabase.from('flash-cards-group').select();
 
   if (error) {
     console.error(error);
@@ -29,8 +29,8 @@ export async function clientLoader({ serverLoader }: Route.ClientLoaderArgs) {
   const serverData = await serverLoader();
   if (serverData) return serverData; // user is logged in
 
-  const categories: string[] = JSON.parse(
-    localStorage.getItem('categories') ?? '[]',
+  const categories: { id: string; name: string }[] = JSON.parse(
+    localStorage.getItem('flash-cards-group') ?? '[]',
   );
   return { data: categories, userEmail: '', isAnonymous: true };
 }
@@ -44,7 +44,7 @@ export default function Home({ loaderData }: Route.ComponentProps) {
   const { data: categories, userEmail } = loaderData;
 
   return (
-    <section className='max-w-7xl mx-auto pt-16'>
+    <section className={`max-w-7xl mx-auto pt-16 ${!categories}`}>
       <h3 className='text-center text-xl'>
         Welcome {userEmail ? userEmail : 'Guest'}
       </h3>
@@ -53,7 +53,7 @@ export default function Home({ loaderData }: Route.ComponentProps) {
         {categories?.map(el => (
           <Link
             className='bg-teal-200 px-4 py-2 h-32 items-center justify-center flex text-xl rounded-xl transition-all duration-200 hover:-translate-y-1'
-            key={el.name}
+            key={el.id}
             to={`/flash-cards/${el.id}`}
           >
             {el.name}
