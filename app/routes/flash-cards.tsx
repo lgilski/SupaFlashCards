@@ -1,11 +1,9 @@
 import { useState } from 'react';
-import { Form } from 'react-router';
+import { data, Form } from 'react-router';
 import { getServerClient } from '~/utils/supabase.server';
 import type { Route } from './+types/flash-cards';
 import { userContext } from '~/context';
 import Spinner from '~/components/Spinner';
-
-// Zrozumieć kiedy robić throw Response, data() i Error
 
 function shuffle(array: any[], shuffle = true) {
   if (!shuffle) {
@@ -35,17 +33,18 @@ export async function loader({ params, request, context }: Route.LoaderArgs) {
   const user = context.get(userContext);
 
   if (!params.id) {
-    throw new Response('Not Found', { status: 404 });
+    throw data('Not Found', { status: 404 });
   }
 
   if (user?.is_anonymous) return null;
 
   const { supabase } = getServerClient(request);
 
-  const { data, error } = await supabase
-    .from('flash-cards-group')
-    .select(
-      `
+  try {
+    const { data: cardsData, error: cardsError } = await supabase
+      .from('flash-cards-group')
+      .select(
+        `
       id,
       name,
       data:cards (
@@ -53,15 +52,20 @@ export async function loader({ params, request, context }: Route.LoaderArgs) {
         answer
         )
         `,
-    )
-    .eq('id', +params.id)
-    .single();
+      )
+      .eq('id', +params.id)
+      .single();
 
-  if (!data) {
-    throw new Response('There is no data', { status: 404 });
-  }
+    if (!cardsData) {
+      throw data('There is no data', { status: 404 });
+    }
 
-  return { data: data.data, categoryName: data.name, isAnonymous: false };
+    return {
+      data: cardsData.data,
+      categoryName: cardsData.name,
+      isAnonymous: false,
+    };
+  } catch (error) {}
 }
 
 export async function clientLoader({

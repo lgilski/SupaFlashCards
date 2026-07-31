@@ -21,7 +21,7 @@ export async function loader({ request }: Route.LoaderArgs) {
     const { data: userResponse, error: userError } =
       await supabase.auth.getUser();
 
-    if (userError) {
+    if (userError && userError.name !== 'AuthSessionMissingError') {
       return {
         error: userError.message,
         env: {
@@ -49,8 +49,6 @@ export async function loader({ request }: Route.LoaderArgs) {
     if (error instanceof Response) {
       throw error;
     }
-
-    console.error('Unable to check the current user session', error);
 
     return data(
       {
