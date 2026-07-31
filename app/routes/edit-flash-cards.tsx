@@ -357,7 +357,7 @@ export default function EditFlashCards({
 
         <div className='flex gap-4 mt-4'>
           <button
-            className='text-lg font-medium text-blue-800 bg-blue-050 px-4 py-2 rounded-md cursor-pointer duration-150 hover:bg-blue-100'
+            className='text-lg font-medium text-teal-800 bg-teal-100 px-4 py-2 rounded-md cursor-pointer duration-150 hover:bg-teal-200'
             type='button'
             onClick={addFlashCard}
           >
@@ -376,7 +376,7 @@ export default function EditFlashCards({
             value='delete-category'
             onClick={handleDeleteCategory}
           >
-            Delete category
+            Delete
           </button>
         </div>
       </div>
