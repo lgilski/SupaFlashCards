@@ -26,11 +26,19 @@ export async function action({ request }: Route.ActionArgs) {
     return data({ error: 'This name is already used by other group.' });
   }
 
-  const { data: newCategoryData, error } = await supabase
+  if (errorNameTaken) {
+    return data({ error: errorNameTaken.message });
+  }
+
+  const { data: newCategoryData, error: newCategoryError } = await supabase
     .from('flash-cards-group')
     .insert({ name })
     .select()
     .single();
+
+  if (newCategoryError) {
+    return data({ error: newCategoryError.message });
+  }
 
   const ids = new Set();
 

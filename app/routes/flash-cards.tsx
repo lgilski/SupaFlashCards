@@ -5,6 +5,8 @@ import type { Route } from './+types/flash-cards';
 import { userContext } from '~/context';
 import Spinner from '~/components/Spinner';
 
+// Zrozumieć kiedy robić throw Response, data() i Error
+
 function shuffle(array: any[], shuffle = true) {
   if (!shuffle) {
     return array;

@@ -5,27 +5,68 @@ import { createBrowserClient } from '@supabase/ssr';
 import { useState, type SubmitEvent } from 'react';
 import type { Database } from '~/database.types';
 
-export async function loader({ request }: Route.LoaderArgs) {
-  const { supabase, headers } = getServerClient(request);
-  const userResponse = await supabase.auth.getUser();
-
-  if (userResponse?.data?.user) {
-    throw redirect('/dashboard');
+// If the error for some reasone is of different type return generic message
+function getErrorMessage(error: unknown) {
+  if (error instanceof Error) {
+    return error.message;
   }
 
-  return data(
-    {
-      env: {
-        SUPABASE_URL: process.env.VITE_SUPABASE_URL!,
-        SUPABASE_PUBLISHABLE_KEY: process.env.VITE_SUPABASE_PUBLISHABLE_KEY!,
+  return 'Something went wrong. Please try again.';
+}
+
+export async function loader({ request }: Route.LoaderArgs) {
+  const { supabase, headers } = getServerClient(request);
+
+  try {
+    const { data: userResponse, error: userError } =
+      await supabase.auth.getUser();
+
+    if (userError) {
+      return {
+        error: userError.message,
+        env: {
+          SUPABASE_URL: process.env.VITE_SUPABASE_URL!,
+          SUPABASE_PUBLISHABLE_KEY: process.env.VITE_SUPABASE_PUBLISHABLE_KEY!,
+        },
+      };
+    }
+
+    if (userResponse?.user) {
+      throw redirect('/dashboard');
+    }
+
+    return data(
+      {
+        error: '',
+        env: {
+          SUPABASE_URL: process.env.VITE_SUPABASE_URL!,
+          SUPABASE_PUBLISHABLE_KEY: process.env.VITE_SUPABASE_PUBLISHABLE_KEY!,
+        },
       },
-    },
-    { headers },
-  );
+      { headers },
+    );
+  } catch (error) {
+    if (error instanceof Response) {
+      throw error;
+    }
+
+    console.error('Unable to check the current user session', error);
+
+    return data(
+      {
+        error: 'Unable to load the login page right now.',
+        env: {
+          SUPABASE_URL: process.env.VITE_SUPABASE_URL!,
+          SUPABASE_PUBLISHABLE_KEY: process.env.VITE_SUPABASE_PUBLISHABLE_KEY!,
+        },
+      },
+      { headers },
+    );
+  }
 }
 
 export default function Login({ loaderData }: Route.ComponentProps) {
-  const { env } = loaderData;
+  const { env, error: loaderError } = loaderData;
   const navigate = useNavigate();
 
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -44,20 +85,25 @@ export default function Login({ loaderData }: Route.ComponentProps) {
       env.SUPABASE_PUBLISHABLE_KEY,
     );
 
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email: dataFields.email as string,
-      password: dataFields.password as string,
-    });
+    try {
+      const { data, error: signInError } =
+        await supabase.auth.signInWithPassword({
+          email: dataFields.email as string,
+          password: dataFields.password as string,
+        });
 
-    setIsSubmitting(false);
+      if (signInError) {
+        setErrorMessage(signInError.message);
+        return;
+      }
 
-    if (error) {
-      setErrorMessage(error.message);
-      return;
-    }
-
-    if (data.session) {
-      navigate('/dashboard');
+      if (data.session) {
+        navigate('/dashboard');
+      }
+    } catch (error) {
+      setErrorMessage(getErrorMessage(error));
+    } finally {
+      setIsSubmitting(false);
     }
   }
 
@@ -71,18 +117,26 @@ export default function Login({ loaderData }: Route.ComponentProps) {
       env.SUPABASE_PUBLISHABLE_KEY,
     );
 
-    setIsSubmitting(false);
+    try {
+      const { data, error } = await supabase.auth.signInAnonymously();
 
-    const { data, error } = await supabase.auth.signInAnonymously();
+      if (error) {
+        setErrorMessage(error.message);
+        return;
+      }
 
-    if (error) {
-      setErrorMessage(error.message);
-      return;
+      if (data.session) {
+        navigate('/dashboard');
+      }
+    } catch (error) {
+      setErrorMessage(getErrorMessage(error));
+    } finally {
+      setIsSubmitting(false);
     }
+  }
 
-    if (data.session) {
-      navigate('/dashboard');
-    }
+  if (loaderError) {
+    return <div>{loaderError}</div>;
   }
 
   return (

@@ -80,5 +80,4 @@ describe('Test create flash cards', () => {
   });
   test.todo('can type in question and answer fields');
   test.todo('card name must be filled');
-  test.todo('card question and answer must be filled');
 });
