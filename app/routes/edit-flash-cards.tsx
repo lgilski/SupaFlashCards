@@ -3,6 +3,7 @@ import type { Route } from './+types/edit-flash-cards';
 import { useRef, useState, type MouseEvent, type SubmitEvent } from 'react';
 import { getServerClient } from '~/utils/supabase.server';
 import { userContext } from '~/context';
+import Spinner from '~/components/Spinner';
 
 // Check if the name is already used by other group
 
@@ -55,7 +56,7 @@ clientLoader.hydrate = true as const;
 
 // Add cool loading spinner
 export function HydrateFallback() {
-  return <div>Loading...</div>;
+  return <Spinner />;
 }
 
 export async function action({ params, request }: Route.ActionArgs) {

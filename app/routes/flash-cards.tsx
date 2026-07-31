@@ -3,6 +3,7 @@ import { Form } from 'react-router';
 import { getServerClient } from '~/utils/supabase.server';
 import type { Route } from './+types/flash-cards';
 import { userContext } from '~/context';
+import Spinner from '~/components/Spinner';
 
 function shuffle(array: any[], shuffle = true) {
   if (!shuffle) {
@@ -84,7 +85,7 @@ export async function clientLoader({
 clientLoader.hydrate = true as const;
 
 export function HydrateFallback() {
-  return <div>Loading...</div>;
+  return <Spinner />;
 }
 
 export default function FlashCards({ loaderData }: Route.ComponentProps) {

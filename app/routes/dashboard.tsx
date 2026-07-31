@@ -2,6 +2,7 @@ import { getServerClient } from '~/utils/supabase.server';
 import type { Route } from './+types/dashboard';
 import { Link } from 'react-router';
 import { userContext } from '~/context';
+import Spinner from '~/components/Spinner';
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -37,7 +38,7 @@ export async function clientLoader({ serverLoader }: Route.ClientLoaderArgs) {
 clientLoader.hydrate = true as const;
 
 export function HydrateFallback() {
-  return <div>Loading...</div>;
+  return <Spinner />;
 }
 
 export default function Home({ loaderData }: Route.ComponentProps) {

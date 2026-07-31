@@ -5,9 +5,13 @@ import { useState, type SubmitEvent } from 'react';
 
 export async function loader({ request }: Route.LoaderArgs) {
   const { supabase } = getServerClient(request);
-  const userResponse = await supabase.auth.getUser();
+  const { data: userResponse, error } = await supabase.auth.getUser();
 
-  if (userResponse?.data?.user) {
+  if (error) {
+    return { error: error.message };
+  }
+
+  if (userResponse?.user) {
     throw redirect('/dashboard');
   }
 
@@ -52,7 +56,12 @@ export async function action({ request }: Route.ActionArgs) {
   return redirect('/login', { headers });
 }
 
-export default function SignUp({ actionData }: Route.ComponentProps) {
+export default function SignUp({
+  loaderData,
+  actionData,
+}: Route.ComponentProps) {
+  const loaderError = loaderData;
+
   const [clientError, setClientError] = useState('');
 
   // Change the naming here
@@ -82,6 +91,10 @@ export default function SignUp({ actionData }: Route.ComponentProps) {
       event.preventDefault();
       setClientError('Passwords do not match');
     }
+  }
+
+  if (loaderError) {
+    return <div>{loaderError?.error}</div>;
   }
 
   return (
