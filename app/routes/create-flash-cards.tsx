@@ -142,7 +142,7 @@ export default function CreateFlashCards({
 
     if (nameTaken) {
       setClientError('This name is already used by other group.');
-      setShowServerError(true);
+      setIncludeServerError(true);
       return;
     }
 
