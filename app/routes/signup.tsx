@@ -63,8 +63,6 @@ export default function SignUp({
   const loaderError = loaderData;
 
   const [clientError, setClientError] = useState('');
-
-  // Change the naming here
   const [showServerError, setShowServerError] = useState(true);
 
   const navigation = useNavigation();
