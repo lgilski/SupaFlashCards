@@ -46,10 +46,10 @@ function renderCreateFlashCards() {
 }
 
 describe('Test create flash cards', () => {
-  test('renders a category name input', () => {
+  test('renders a group name input', () => {
     renderCreateFlashCards();
 
-    expect(screen.getByLabelText('Category name')).toBeInTheDocument();
+    expect(screen.getByLabelText('Group name')).toBeInTheDocument();
   });
 
   test('creates empty flash card', () => {

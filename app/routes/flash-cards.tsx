@@ -67,7 +67,7 @@ export async function loader({ params, request, context }: Route.LoaderArgs) {
 
     return {
       data: cardsData.data,
-      categoryName: cardsData.name,
+      groupName: cardsData.name,
       isAnonymous: false,
     };
   } catch (error) {
@@ -84,14 +84,12 @@ export async function clientLoader({
 
   // anonymous — read from localStorage instead
   const cards = JSON.parse(localStorage.getItem('cards') ?? '{}');
-  const categories = JSON.parse(
-    localStorage.getItem('flash-cards-group') ?? '[]',
-  );
-  const category = categories.find((c: any) => c.id === params.id);
+  const groups = JSON.parse(localStorage.getItem('flash-cards-group') ?? '[]');
+  const group = groups.find((c: any) => c.id === params.id);
 
   return {
     data: cards[params.id] ?? [],
-    categoryName: category?.name ?? '',
+    groupName: group?.name ?? '',
     isAnonymous: true,
   };
 }
@@ -102,7 +100,7 @@ export function HydrateFallback() {
 }
 
 export default function FlashCards({ loaderData }: Route.ComponentProps) {
-  const { data, categoryName } = loaderData;
+  const { data, groupName } = loaderData;
   const [triggerShuffle, setTriggerShuffle] = useState(false);
   const [cardsToDisplay, setCardsToDisplay] = useState<
     { question: string; answer: string }[]
@@ -141,8 +139,14 @@ export default function FlashCards({ loaderData }: Route.ComponentProps) {
   }
 
   function shuffleChange() {
-    setTriggerShuffle(prevState => !prevState);
-    startOver();
+    // Its neccessary, because of the way that state gets updated. Without it the passed value would be delayed
+    const newTriggerShuffle = !triggerShuffle;
+
+    setTriggerShuffle(newTriggerShuffle);
+    setCardsToDisplay(shuffle(data, newTriggerShuffle));
+    setCardsToRepeat([]);
+    setCurrentCard(0);
+    setShowAnswer(false);
   }
 
   if (cardsToDisplay.length < 1) {
@@ -210,7 +214,7 @@ export default function FlashCards({ loaderData }: Route.ComponentProps) {
   return (
     <section className='max-w-3xl mx-auto flex flex-col gap-4 items-center bg-white p-4 my-16 shadow-md relative'>
       <div className='w-full flex gap-2'>
-        <h2 className='font-semibold'>{categoryName}</h2>
+        <h2 className='font-semibold'>{groupName}</h2>
         <Form action='edit'>
           <button
             className='text-blue-grey-600 hover:text-blue-grey-700 cursor-pointer duration-150'

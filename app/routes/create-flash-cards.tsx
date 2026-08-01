@@ -30,14 +30,14 @@ export async function action({ request }: Route.ActionArgs) {
       return data({ error: errorNameTaken.message });
     }
 
-    const { data: newCategoryData, error: newCategoryError } = await supabase
+    const { data: newGroupData, error: newGroupError } = await supabase
       .from('flash-cards-group')
       .insert({ name })
       .select()
       .single();
 
-    if (newCategoryError) {
-      return data({ error: newCategoryError.message });
+    if (newGroupError) {
+      return data({ error: newGroupError.message });
     }
 
     const ids = new Set();
@@ -52,7 +52,7 @@ export async function action({ request }: Route.ActionArgs) {
 
     // Then we get the full data of those elements by id that we added to the set earlier
     const flashcards = [...ids].map(id => ({
-      group_id: newCategoryData!.id,
+      group_id: newGroupData!.id,
       question: formData.get(`question-${id}`) as string,
       answer: formData.get(`answer-${id}`) as string,
     }));
@@ -65,7 +65,7 @@ export async function action({ request }: Route.ActionArgs) {
       return data({ error: insertError.message });
     }
 
-    return redirect('/flash-cards/' + newCategoryData!.id);
+    return redirect('/flash-cards/' + newGroupData!.id);
   } catch (error) {
     console.log(error);
 
@@ -133,12 +133,12 @@ export default function CreateFlashCards({
 
     event.preventDefault();
 
-    const categories = JSON.parse(
+    const groups = JSON.parse(
       localStorage.getItem('flash-cards-group') ?? '[]',
     );
     const cards = JSON.parse(localStorage.getItem('cards') ?? '{}');
 
-    const nameTaken = categories.find((el: any) => el.name === name);
+    const nameTaken = groups.find((el: any) => el.name === name);
 
     if (nameTaken) {
       setClientError('This name is already used by other group.');
@@ -146,7 +146,7 @@ export default function CreateFlashCards({
       return;
     }
 
-    const categoryId = crypto.randomUUID();
+    const groupId = crypto.randomUUID();
 
     const ids = new Set<string>();
     for (const key of formData.keys()) {
@@ -159,13 +159,13 @@ export default function CreateFlashCards({
       answer: formData.get(`answer-${id}`) as string,
     }));
 
-    categories.push({ id: categoryId, name });
-    cards[categoryId] = flashcards;
+    groups.push({ id: groupId, name });
+    cards[groupId] = flashcards;
 
-    localStorage.setItem('flash-cards-group', JSON.stringify(categories));
+    localStorage.setItem('flash-cards-group', JSON.stringify(groups));
     localStorage.setItem('cards', JSON.stringify(cards));
 
-    navigate('/flash-cards/' + categoryId);
+    navigate('/flash-cards/' + groupId);
   }
 
   return (
@@ -180,7 +180,7 @@ export default function CreateFlashCards({
         </p>
       )}
       <div className='inline-flex flex-col'>
-        <label htmlFor='name'>Category name</label>
+        <label htmlFor='name'>Group name</label>
         <input
           className='bg-blue-grey-050 rounded-md px-2 py-1 inset-shadow-sm'
           id='name'

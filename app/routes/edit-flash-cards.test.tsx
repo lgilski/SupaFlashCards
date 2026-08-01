@@ -19,7 +19,7 @@ function renderEditFlashCards(
   cardsData: { id: string; question: string; answer: string }[] | null,
 ) {
   const editProps = {
-    loaderData: { cardsData, categoryName: 'Science' },
+    loaderData: { cardsData, groupName: 'Science' },
   } as unknown as ComponentProps<typeof EditFlashCards>;
   const router = createMemoryRouter([
     {
@@ -36,7 +36,7 @@ describe('EditFlashCards', () => {
     vi.clearAllMocks();
   });
 
-  test('renders the category and existing flash cards', () => {
+  test('renders the group and existing flash cards', () => {
     renderEditFlashCards([
       { id: 'card-1', question: 'What is H2O?', answer: 'Water' },
     ]);
@@ -51,7 +51,7 @@ describe('EditFlashCards', () => {
     expect(screen.getByText('Flash card number 1')).toBeInTheDocument();
   });
 
-  test('starts with one empty card when the category has no cards', () => {
+  test('starts with one empty card when the group has no cards', () => {
     renderEditFlashCards(null);
 
     expect(screen.getByRole('textbox', { name: 'Question' })).toHaveValue('');
@@ -116,15 +116,15 @@ describe('EditFlashCards', () => {
 //     vi.clearAllMocks();
 //   });
 
-//   test('loader fetches the category and its cards', async () => {
-//     const categorySingle = vi.fn().mockResolvedValue({
+//   test('loader fetches the group and its cards', async () => {
+//     const groupSingle = vi.fn().mockResolvedValue({
 //       data: { name: 'Science' },
 //     });
 //     const cardsEq = vi.fn().mockResolvedValue({
 //       data: [{ id: 'card-1', question: 'Q', answer: 'A' }],
 //     });
-//     const categoryBuilder = {
-//       select: vi.fn(() => ({ eq: vi.fn(() => ({ single: categorySingle })) })),
+//     const groupBuilder = {
+//       select: vi.fn(() => ({ eq: vi.fn(() => ({ single: groupSingle })) })),
 //     };
 //     const cardsBuilder = {
 //       select: vi.fn(() => ({ eq: cardsEq })),
@@ -132,27 +132,27 @@ describe('EditFlashCards', () => {
 //     mockedgetServerClient.mockReturnValue({
 //       supabase: {
 //         from: vi.fn(table =>
-//           table === 'flash-cards-group' ? categoryBuilder : cardsBuilder,
+//           table === 'flash-cards-group' ? groupBuilder : cardsBuilder,
 //         ),
 //       },
 //     } as never);
 
 //     await expect(
 //       loader({
-//         params: { id: 'category-1' },
+//         params: { id: 'group-1' },
 //         request: new Request('http://test'),
 //       } as never),
 //     ).resolves.toEqual({
 //       cardsData: [{ id: 'card-1', question: 'Q', answer: 'A' }],
-//       categoryName: 'Science',
+//       groupName: 'Science',
 //     });
 //   });
 
 //   test('action updates, deletes, and inserts cards before redirecting', async () => {
-//     const categorySingle = vi.fn().mockResolvedValue({
-//       data: { id: 'category-1', name: 'Science' },
+//     const groupSingle = vi.fn().mockResolvedValue({
+//       data: { id: 'group-1', name: 'Science' },
 //     });
-//     const categoryUpdate = vi.fn().mockReturnValue({
+//     const groupUpdate = vi.fn().mockReturnValue({
 //       eq: vi.fn().mockResolvedValue({ error: null }),
 //     });
 //     const cardsDelete = vi.fn().mockReturnValue({
@@ -162,11 +162,11 @@ describe('EditFlashCards', () => {
 //       eq: vi.fn().mockResolvedValue({ error: null }),
 //     });
 //     const cardsInsert = vi.fn().mockResolvedValue({ error: null });
-//     const categoryBuilder = {
+//     const groupBuilder = {
 //       select: vi.fn(() => ({
-//         eq: vi.fn(() => ({ single: categorySingle })),
+//         eq: vi.fn(() => ({ single: groupSingle })),
 //       })),
-//       update: categoryUpdate,
+//       update: groupUpdate,
 //     };
 //     const cardsBuilder = {
 //       delete: cardsDelete,
@@ -176,7 +176,7 @@ describe('EditFlashCards', () => {
 //     mockedgetServerClient.mockReturnValue({
 //       supabase: {
 //         from: vi.fn(table =>
-//           table === 'flash-cards-group' ? categoryBuilder : cardsBuilder,
+//           table === 'flash-cards-group' ? groupBuilder : cardsBuilder,
 //         ),
 //       },
 //     } as never);
@@ -190,20 +190,20 @@ describe('EditFlashCards', () => {
 //     formData.set('answer-new-1', 'New answer');
 
 //     const result = await action({
-//       params: { id: 'category-1' },
+//       params: { id: 'group-1' },
 //       request: new Request('http://test', { method: 'POST', body: formData }),
 //     } as never);
 
-//     expect(categoryUpdate).toHaveBeenCalledWith({ name: 'Biology' });
+//     expect(groupUpdate).toHaveBeenCalledWith({ name: 'Biology' });
 //     expect(cardsDelete).toHaveBeenCalled();
 //     expect(cardsUpdate).toHaveBeenCalledWith({
-//       group_id: 'category-1',
+//       group_id: 'group-1',
 //       question: 'Updated question',
 //       answer: 'Updated answer',
 //     });
 //     expect(cardsInsert).toHaveBeenCalledWith([
 //       {
-//         group_id: 'category-1',
+//         group_id: 'group-1',
 //         question: 'New question',
 //         answer: 'New answer',
 //       },

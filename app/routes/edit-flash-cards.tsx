@@ -14,20 +14,20 @@ export async function loader({ params, request, context }: Route.LoaderArgs) {
 
   const { supabase } = getServerClient(request);
 
-  const { data: categoryData } = await supabase
+  const { data: groupData, error: groupError } = await supabase
     .from('flash-cards-group')
     .select()
     .eq('id', +params.id)
     .single();
 
-  const { data: cardsData } = await supabase
+  const { data: cardsData, error: cardsError } = await supabase
     .from('cards')
     .select()
     .eq('group_id', +params.id);
 
   return {
     cardsData,
-    categoryName: categoryData?.name ?? '',
+    groupName: groupData?.name ?? '',
     isAnonymous: false,
   };
 }
@@ -40,14 +40,12 @@ export async function clientLoader({
   if (serverData) return serverData;
 
   const cards = JSON.parse(localStorage.getItem('cards') ?? '{}');
-  const categories = JSON.parse(
-    localStorage.getItem('flash-cards-group') ?? '[]',
-  );
-  const category = categories.find((el: any) => el.id === params.id);
+  const groups = JSON.parse(localStorage.getItem('flash-cards-group') ?? '[]');
+  const group = groups.find((el: any) => el.id === params.id);
 
   return {
     cardsData: cards[params.id],
-    categoryName: category.name,
+    groupName: group.name,
     isAnonymous: true,
   };
 }
@@ -65,29 +63,29 @@ export async function action({ params, request }: Route.ActionArgs) {
   const newName = formData.get('name') as string;
 
   // If pressed the delete button
-  if (formData.get('delete') === 'delete-category') {
+  if (formData.get('delete') === 'delete-group') {
     const { error: cardsError } = await supabase
       .from('cards')
       .delete()
       .eq('group_id', +params.id);
     if (cardsError) console.error('delete cards error:', cardsError);
 
-    const { error: categoryError } = await supabase
+    const { error: groupError } = await supabase
       .from('flash-cards-group')
       .delete()
       .eq('id', +params.id);
-    if (categoryError) console.error('delete category error:', categoryError);
+    if (groupError) console.error('delete group error:', groupError);
 
     return redirect('/dashboard');
   }
 
-  const { data: categoryData } = await supabase
+  const { data: groupData } = await supabase
     .from('flash-cards-group')
     .select()
     .eq('id', +params.id)
     .single();
 
-  if (newName !== categoryData!.name) {
+  if (newName !== groupData!.name) {
     await supabase
       .from('flash-cards-group')
       .update({ name: newName })
@@ -122,7 +120,7 @@ export async function action({ params, request }: Route.ActionArgs) {
 
   for (const id of ids) {
     const card = {
-      group_id: +categoryData!.id,
+      group_id: +groupData!.id,
       question: formData.get(`question-${id}`) as string,
       answer: formData.get(`answer-${id}`) as string,
     };
@@ -204,10 +202,10 @@ export default function EditFlashCards({
     }
   }
 
-  function handleDeleteCategory(event: MouseEvent<HTMLButtonElement>) {
+  function handleDeleteGroup(event: MouseEvent<HTMLButtonElement>) {
     // Insted of that add confirmation modal
     const confirmed = window.confirm(
-      'Are you sure you want to delete this category and all its flashcards? This cannot be undone.',
+      'Are you sure you want to delete this group and all its flashcards? This cannot be undone.',
     );
     if (!confirmed) {
       event.preventDefault();
@@ -218,20 +216,15 @@ export default function EditFlashCards({
 
     event.preventDefault();
 
-    const categories = JSON.parse(
+    const groups = JSON.parse(
       localStorage.getItem('flash-cards-group') ?? '[]',
     );
     const cards = JSON.parse(localStorage.getItem('cards') ?? '{}');
 
-    const updatedCategories = categories.filter(
-      (el: any) => el.id !== params.id,
-    );
+    const updatedGroups = groups.filter((el: any) => el.id !== params.id);
     delete cards[params.id!];
 
-    localStorage.setItem(
-      'flash-cards-group',
-      JSON.stringify(updatedCategories),
-    );
+    localStorage.setItem('flash-cards-group', JSON.stringify(updatedGroups));
     localStorage.setItem('cards', JSON.stringify(cards));
 
     navigate('/dashboard');
@@ -244,12 +237,12 @@ export default function EditFlashCards({
     const formData = new FormData(event.currentTarget);
     const newName = formData.get('name') as string;
 
-    const categories = JSON.parse(
+    const groups = JSON.parse(
       localStorage.getItem('flash-cards-group') ?? '[]',
     );
     const cards = JSON.parse(localStorage.getItem('cards') ?? '{}');
 
-    const updatedCategories = categories.map((el: any) =>
+    const updatedGroups = groups.map((el: any) =>
       el.id === params.id ? { ...el, name: newName } : el,
     );
 
@@ -258,10 +251,7 @@ export default function EditFlashCards({
       answer,
     }));
 
-    localStorage.setItem(
-      'flash-cards-group',
-      JSON.stringify(updatedCategories),
-    );
+    localStorage.setItem('flash-cards-group', JSON.stringify(updatedGroups));
     localStorage.setItem('cards', JSON.stringify(cards));
 
     navigate('/flash-cards/' + params.id);
@@ -274,14 +264,14 @@ export default function EditFlashCards({
       className='max-w-5xl mx-auto flex flex-col bg-white rounded-md py-4 px-8 my-30 shadow-md'
     >
       <div className='inline-flex flex-col'>
-        <label htmlFor='name'>Category name</label>
+        <label htmlFor='name'>Group name</label>
         <input
           className='bg-blue-grey-050 rounded-md px-2 py-1 inset-shadow-sm'
           id='name'
           name='name'
           type='text'
           autoComplete='off'
-          defaultValue={loaderData.categoryName}
+          defaultValue={loaderData.groupName}
         />
       </div>
 
@@ -374,8 +364,8 @@ export default function EditFlashCards({
             className='text-lg font-medium text-red-050 bg-red-600 px-4 py-2 rounded-md cursor-pointer duration-150 hover:bg-red-500'
             type='submit'
             name='delete'
-            value='delete-category'
-            onClick={handleDeleteCategory}
+            value='delete-group'
+            onClick={handleDeleteGroup}
           >
             Delete
           </button>

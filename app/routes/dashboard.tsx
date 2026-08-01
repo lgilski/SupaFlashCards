@@ -30,10 +30,10 @@ export async function clientLoader({ serverLoader }: Route.ClientLoaderArgs) {
   const serverData = await serverLoader();
   if (serverData) return serverData; // user is logged in
 
-  const categories: { id: string; name: string }[] = JSON.parse(
+  const groups: { id: string; name: string }[] = JSON.parse(
     localStorage.getItem('flash-cards-group') ?? '[]',
   );
-  return { data: categories, userEmail: '', isAnonymous: true };
+  return { data: groups, userEmail: '', isAnonymous: true };
 }
 clientLoader.hydrate = true as const;
 
@@ -42,19 +42,19 @@ export function HydrateFallback() {
 }
 
 export default function Home({ loaderData }: Route.ComponentProps) {
-  const { data: categories, userEmail } = loaderData;
+  const { data: groups, userEmail } = loaderData;
 
   return (
     <section className='max-w-7xl mx-auto pt-16'>
       <h3 className='text-center text-xl'>
         Welcome {userEmail ? userEmail : 'Guest'}
       </h3>
-      {/* Add graphics for each category/group?? */}
+      {/* Add graphics for each group/group?? */}
       {/* min-h-155 */}
       <div
-        className={` bg-white rounded-md py-4 px-8 my-4 shadow-md min-h-80 ${categories && categories.length < 1 ? 'flex flex-col items-center justify-center' : 'grid grid-cols-3 gap-8 '}`}
+        className={` bg-white rounded-md py-4 px-8 my-4 shadow-md min-h-80 ${groups && groups.length < 1 ? 'flex flex-col items-center justify-center' : 'grid grid-cols-3 gap-8 '}`}
       >
-        {categories && categories.length < 1 && (
+        {groups && groups.length < 1 && (
           <>
             <h2 className='text-3xl font-semibold text-teal-900'>
               There are no flash cards yet
@@ -68,7 +68,7 @@ export default function Home({ loaderData }: Route.ComponentProps) {
             </Link>
           </>
         )}
-        {categories?.map(el => (
+        {groups?.map(el => (
           <Link
             className='bg-teal-200 px-4 py-2 h-32 items-center justify-center flex text-xl rounded-xl transition-all duration-200 hover:-translate-y-1'
             key={el.id}
