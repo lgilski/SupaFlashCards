@@ -3,6 +3,7 @@ import type { Route } from './+types/create-flash-cards';
 import { useState, type SubmitEvent } from 'react';
 import { getServerClient } from '~/utils/supabase.server';
 import { userContext } from '~/context';
+import getErrorMessage from '~/utils/getErrorMessage';
 
 export async function loader({ context }: Route.LoaderArgs) {
   const user = context.get(userContext);
@@ -10,53 +11,66 @@ export async function loader({ context }: Route.LoaderArgs) {
 }
 
 export async function action({ request }: Route.ActionArgs) {
-  // Add error handling
-
   let formData = await request.formData();
   let name = formData.get('name') as string;
 
   const { supabase } = getServerClient(request);
 
-  const { data: nameTaken, error: errorNameTaken } = await supabase
-    .from('flash-cards-group')
-    .select()
-    .eq('name', name);
+  try {
+    const { data: nameTaken, error: errorNameTaken } = await supabase
+      .from('flash-cards-group')
+      .select()
+      .eq('name', name);
 
-  if (nameTaken) {
-    return data({ error: 'This name is already used by other group.' });
+    if (nameTaken && nameTaken?.length > 1) {
+      return data({ error: 'This name is already used by other group.' });
+    }
+
+    if (errorNameTaken) {
+      return data({ error: errorNameTaken.message });
+    }
+
+    const { data: newCategoryData, error: newCategoryError } = await supabase
+      .from('flash-cards-group')
+      .insert({ name })
+      .select()
+      .single();
+
+    if (newCategoryError) {
+      return data({ error: newCategoryError.message });
+    }
+
+    const ids = new Set();
+
+    for (const key of formData.keys()) {
+      // Matching names to the question-number or answer-number cnovention. If it matches that then the key gets returned but with additional stuff
+      const match = key.match(/^(question|answer)-(\d+)$/);
+
+      // on index 2 there is a number at the end of question-number
+      if (match) ids.add(match[2]);
+    }
+
+    // Then we get the full data of those elements by id that we added to the set earlier
+    const flashcards = [...ids].map(id => ({
+      group_id: newCategoryData!.id,
+      question: formData.get(`question-${id}`) as string,
+      answer: formData.get(`answer-${id}`) as string,
+    }));
+
+    const { error: insertError } = await supabase
+      .from('cards')
+      .insert(flashcards);
+
+    if (insertError) {
+      return data({ error: insertError.message });
+    }
+
+    return redirect('/flash-cards/' + newCategoryData!.id);
+  } catch (error) {
+    console.log(error);
+
+    throw data(getErrorMessage(error), { status: 500 });
   }
-
-  if (errorNameTaken) {
-    return data({ error: errorNameTaken.message });
-  }
-
-  const { data: newCategoryData, error: newCategoryError } = await supabase
-    .from('flash-cards-group')
-    .insert({ name })
-    .select()
-    .single();
-
-  if (newCategoryError) {
-    return data({ error: newCategoryError.message });
-  }
-
-  const ids = new Set();
-
-  // Zrozumieć to do końca i skomentować
-  for (const key of formData.keys()) {
-    const match = key.match(/^(question|answer)-(\d+)$/);
-    if (match) ids.add(match[2]);
-  }
-
-  const flashcards = [...ids].map(id => ({
-    group_id: newCategoryData!.id,
-    question: formData.get(`question-${id}`) as string,
-    answer: formData.get(`answer-${id}`) as string,
-  }));
-
-  await supabase.from('cards').insert(flashcards);
-
-  return redirect('/flash-cards/' + newCategoryData!.id);
 }
 
 let id = 1;
@@ -66,10 +80,9 @@ export default function CreateFlashCards({
 }: Route.ComponentProps) {
   const [clientError, setClientError] = useState('');
 
-  // Change the naming here
-  const [showServerError, setShowServerError] = useState(true);
+  const [includeServerError, setIncludeServerError] = useState(true);
 
-  const serverError = showServerError ? actionData?.error : null;
+  const serverError = includeServerError ? actionData?.error : null;
   const errorMessage = clientError || serverError;
 
   const { isAnonymous } = loaderData;
@@ -104,7 +117,7 @@ export default function CreateFlashCards({
 
   function handleSubmit(event: SubmitEvent<HTMLFormElement>) {
     setClientError('');
-    setShowServerError(false);
+    setIncludeServerError(false);
 
     const formData = new FormData(event.currentTarget);
     const name = formData.get('name');
@@ -112,7 +125,7 @@ export default function CreateFlashCards({
     if (!name) {
       event.preventDefault();
       setClientError('The group has to have a name.');
-      setShowServerError(true);
+      setIncludeServerError(true);
       return;
     }
 

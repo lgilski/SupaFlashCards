@@ -4,15 +4,7 @@ import { data, Form, redirect, useNavigate } from 'react-router';
 import { createBrowserClient } from '@supabase/ssr';
 import { useState, type SubmitEvent } from 'react';
 import type { Database } from '~/database.types';
-
-// If the error for some reasone is of different type return generic message
-function getErrorMessage(error: unknown) {
-  if (error instanceof Error) {
-    return error.message;
-  }
-
-  return 'Something went wrong. Please try again.';
-}
+import getErrorMessage from '~/utils/getErrorMessage';
 
 export async function loader({ request }: Route.LoaderArgs) {
   const { supabase, headers } = getServerClient(request);

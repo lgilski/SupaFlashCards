@@ -4,6 +4,7 @@ import { getServerClient } from '~/utils/supabase.server';
 import type { Route } from './+types/flash-cards';
 import { userContext } from '~/context';
 import Spinner from '~/components/Spinner';
+import getErrorMessage from '~/utils/getErrorMessage';
 
 function shuffle(array: any[], shuffle = true) {
   if (!shuffle) {
@@ -60,12 +61,18 @@ export async function loader({ params, request, context }: Route.LoaderArgs) {
       throw data('There is no data', { status: 404 });
     }
 
+    if (cardsError) {
+      throw data('Something went wrong.', { status: 500 });
+    }
+
     return {
       data: cardsData.data,
       categoryName: cardsData.name,
       isAnonymous: false,
     };
-  } catch (error) {}
+  } catch (error) {
+    throw data(getErrorMessage(error), { status: 500 });
+  }
 }
 
 export async function clientLoader({
@@ -140,7 +147,7 @@ export default function FlashCards({ loaderData }: Route.ComponentProps) {
 
   if (cardsToDisplay.length < 1) {
     return (
-      <section className='max-w-3xl mx-auto flex flex-col items-center bg-white p-4 mt-16 shadow-md h-80 justify-center'>
+      <section className='max-w-3xl mx-auto flex flex-col items-center bg-white p-4 my-16 shadow-md h-80 justify-center'>
         <h2 className='text-3xl font-semibold text-teal-900'>
           Flash cards are missing
         </h2>
@@ -159,7 +166,7 @@ export default function FlashCards({ loaderData }: Route.ComponentProps) {
 
   if (currentCard === cardsToDisplay.length) {
     return (
-      <section className='max-w-3xl mx-auto flex flex-col items-center bg-white p-4 mt-16 shadow-md h-80 justify-center'>
+      <section className='max-w-3xl mx-auto flex flex-col items-center bg-white p-4 my-16 shadow-md h-80 justify-center'>
         {cardsToRepeat.length > 0 && (
           <button
             className='font-medium text-teal-800 bg-teal-100 px-2 py-1 rounded-md cursor-pointer duration-150 hover:bg-teal-200 mt-4 flex items-center gap-2'
@@ -201,7 +208,7 @@ export default function FlashCards({ loaderData }: Route.ComponentProps) {
   }
 
   return (
-    <section className='max-w-3xl mx-auto flex flex-col gap-4 items-center bg-white p-4 mt-16 shadow-md relative'>
+    <section className='max-w-3xl mx-auto flex flex-col gap-4 items-center bg-white p-4 my-16 shadow-md relative'>
       <div className='w-full flex gap-2'>
         <h2 className='font-semibold'>{categoryName}</h2>
         <Form action='edit'>
