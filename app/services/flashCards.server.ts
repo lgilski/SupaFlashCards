@@ -1,7 +1,8 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
+import type { Database } from '~/database.types';
 
 export async function getGroupWithCards(
-  supabase: SupabaseClient,
+  supabase: SupabaseClient<Database>,
   groupId: number,
 ) {
   const { data: groupData, error: groupError } = await supabase

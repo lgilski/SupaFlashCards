@@ -1,9 +1,21 @@
 import { useRef, useState } from 'react';
 
 export function useFlashCardsEditor(
-  initialCards: { id: string; question: string; answer: string }[],
+  initialCards: {
+    answer: string;
+    created_at?: string;
+    group_id: number | string;
+    id: number | string;
+    question: string;
+  }[],
 ) {
-  const [currentFlashCards, setCurrentFlashCards] = useState(
+  const [currentFlashCards, setCurrentFlashCards] = useState<
+    {
+      answer: string;
+      question: string;
+      id: string | number;
+    }[]
+  >(
     initialCards.length
       ? initialCards
       : [{ id: 'new-0', question: '', answer: '' }],

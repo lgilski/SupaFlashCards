@@ -14,3 +14,5 @@ export interface FlashCardContent {
 export type FlashCardsByGroup = Record<string, FlashCardContent[]>;
 
 export type FlashCardsGroup = FlashCardsGroupElement[];
+
+export type FlatFlashCard = FlashCardContent & { id: string };

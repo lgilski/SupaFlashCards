@@ -5,6 +5,13 @@ import { getServerClient } from '~/utils/supabase.server';
 import { userContext } from '~/context';
 import getErrorMessage from '~/utils/getErrorMessage';
 import { FlashCardFieldset } from '~/components/FlashCardFieldSet';
+import {
+  getLocalCards,
+  getLocalGroups,
+  saveLocalCards,
+  saveLocalGroups,
+} from '~/utils/localFlashCards';
+import { useFlashCardsEditor } from '~/hooks/useFlashCardsEditor';
 
 export async function loader({ context }: Route.LoaderArgs) {
   const user = context.get(userContext);
@@ -18,19 +25,6 @@ export async function action({ request }: Route.ActionArgs) {
   const { supabase } = getServerClient(request);
 
   try {
-    const { data: nameTaken, error: errorNameTaken } = await supabase
-      .from('flash-cards-group')
-      .select()
-      .eq('name', name);
-
-    if (nameTaken && nameTaken?.length > 1) {
-      return data({ error: 'This name is already used by other group.' });
-    }
-
-    if (errorNameTaken) {
-      return data({ error: errorNameTaken.message });
-    }
-
     const { data: newGroupData, error: newGroupError } = await supabase
       .from('flash-cards-group')
       .insert({ name })
@@ -68,65 +62,35 @@ export async function action({ request }: Route.ActionArgs) {
 
     return redirect('/flash-cards/' + newGroupData!.id);
   } catch (error) {
-    console.log(error);
-
     throw data(getErrorMessage(error), { status: 500 });
   }
 }
 
-let id = 1;
 export default function CreateFlashCards({
   loaderData,
   actionData,
 }: Route.ComponentProps) {
   const [clientError, setClientError] = useState('');
 
-  const [includeServerError, setIncludeServerError] = useState(true);
-
-  const serverError = includeServerError ? actionData?.error : null;
-  const errorMessage = clientError || serverError;
+  const actionError = actionData?.error;
+  const errorMessage = clientError || actionError;
 
   const { isAnonymous } = loaderData;
 
   const navigate = useNavigate();
 
-  const [currentFlashCards, setCurrentFlashCards] = useState<
-    { id: string; question: string; answer: string }[]
-  >([{ id: '0', question: '', answer: '' }]);
-
-  function addFlashCard() {
-    setCurrentFlashCards(prevState => [
-      ...prevState,
-      { id: '' + id, question: '', answer: '' },
-    ]);
-    id++;
-  }
-
-  function updateFlashCard(id: string, field: string, newValue: string) {
-    setCurrentFlashCards(prevState =>
-      prevState.map(flashCard =>
-        flashCard.id === id ? { ...flashCard, [field]: newValue } : flashCard,
-      ),
-    );
-  }
-
-  function removeFlashCard(id: string) {
-    setCurrentFlashCards(prevState =>
-      prevState.filter(flashCard => flashCard.id !== id),
-    );
-  }
+  const { addFlashCard, currentFlashCards, removeFlashCard, updateFlashCard } =
+    useFlashCardsEditor([]);
 
   function handleSubmit(event: SubmitEvent<HTMLFormElement>) {
     setClientError('');
-    setIncludeServerError(false);
 
     const formData = new FormData(event.currentTarget);
-    const name = formData.get('name');
+    const name = formData.get('name') as string;
 
     if (!name) {
       event.preventDefault();
       setClientError('The group has to have a name.');
-      setIncludeServerError(true);
       return;
     }
 
@@ -134,16 +98,13 @@ export default function CreateFlashCards({
 
     event.preventDefault();
 
-    const groups = JSON.parse(
-      localStorage.getItem('flash-cards-group') ?? '[]',
-    );
-    const cards = JSON.parse(localStorage.getItem('cards') ?? '{}');
+    const groups = getLocalGroups();
+    const cards = getLocalCards();
 
-    const nameTaken = groups.find((el: any) => el.name === name);
+    const nameTaken = groups.find(el => el.name === name);
 
     if (nameTaken) {
       setClientError('This name is already used by other group.');
-      setIncludeServerError(true);
       return;
     }
 
@@ -163,8 +124,8 @@ export default function CreateFlashCards({
     groups.push({ id: groupId, name });
     cards[groupId] = flashcards;
 
-    localStorage.setItem('flash-cards-group', JSON.stringify(groups));
-    localStorage.setItem('cards', JSON.stringify(cards));
+    saveLocalGroups(groups);
+    saveLocalCards(cards);
 
     navigate('/flash-cards/' + groupId);
   }
@@ -195,11 +156,11 @@ export default function CreateFlashCards({
           <FlashCardFieldset
             key={flashCard.id}
             index={index}
-            id={flashCard.id}
+            id={'' + flashCard.id}
             answer={flashCard.answer}
             question={flashCard.question}
             onChange={updateFlashCard}
-            onRemove={() => removeFlashCard(flashCard.id)}
+            onRemove={() => removeFlashCard('' + flashCard.id)}
           />
         ))}
 

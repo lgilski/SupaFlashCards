@@ -1,6 +1,6 @@
 import { data, Form, redirect, useNavigate, useNavigation } from 'react-router';
 import type { Route } from './+types/edit-flash-cards';
-import { type MouseEvent, type SubmitEvent } from 'react';
+import { useState, type MouseEvent, type SubmitEvent } from 'react';
 import { getServerClient } from '~/utils/supabase.server';
 import { userContext } from '~/context';
 import Spinner from '~/components/Spinner';
@@ -47,17 +47,23 @@ export async function clientLoader({
   serverLoader,
   params,
 }: Route.ClientLoaderArgs) {
-  const groupId = +params.id;
+  const groupId = params.id;
   const serverData = await serverLoader();
   if (serverData) return serverData;
 
-  const cards = JSON.parse(localStorage.getItem('cards') ?? '{}');
-  const groups = JSON.parse(localStorage.getItem('flash-cards-group') ?? '[]');
-  const group = groups.find((el: any) => el.id === groupId);
+  const cards = getLocalCards();
+  const groups = getLocalGroups();
+  const group = groups.find(el => el.id === groupId);
+
+  const cardsToPass = cards[groupId].map(el => ({
+    ...el,
+    id: crypto.randomUUID() as string,
+    group_id: groupId,
+  }));
 
   return {
-    cardsData: cards[groupId],
-    groupName: group.name,
+    cardsData: cardsToPass,
+    groupName: group!.name!,
     isAnonymous: true,
   };
 }
@@ -81,12 +87,14 @@ export async function action({ params, request }: Route.ActionArgs) {
   }
 
   const newName = formData.get('name') as string;
+
   const { error: nameError } = await updateGroupName(
     supabase,
     groupId,
     newName,
   );
-  if (nameError) return data({ error: nameError });
+  if (nameError)
+    return data({ error: 'This name is already used by other group.' });
 
   const deletedIds = formData.getAll('deletedIds').map(Number);
   const { toInsert, toUpdate } = parseFlashCardsFromFormData(formData);
@@ -110,10 +118,14 @@ export default function EditFlashCards({
   const navigate = useNavigate();
   const navigation = useNavigation();
   const isSubmitting = navigation.state === 'submitting';
-  const groupId = +params.id;
+  const groupId = params.id;
 
   const { isAnonymous, cardsData } = loaderData;
+  const [clientError, setClientError] = useState('');
+  // const [includeServerError, setIncludeServerError] = useState(true);
+
   const actionError = actionData?.error;
+  const errorMessage = clientError || actionError;
 
   const {
     currentFlashCards,
@@ -121,7 +133,7 @@ export default function EditFlashCards({
     updateFlashCard,
     removeFlashCard,
     addFlashCard,
-  } = useFlashCardsEditor(cardsData);
+  } = useFlashCardsEditor(cardsData!);
 
   function handleDeleteGroup(event: MouseEvent<HTMLButtonElement>) {
     // Insted of that add confirmation modal??
@@ -149,6 +161,8 @@ export default function EditFlashCards({
   }
 
   function handleSubmit(event: SubmitEvent<HTMLFormElement>) {
+    setClientError('');
+
     if (!isAnonymous) return;
     event.preventDefault();
 
@@ -157,6 +171,15 @@ export default function EditFlashCards({
 
     const groups = getLocalGroups();
     const cards = getLocalCards();
+
+    console.log(cards);
+
+    const nameTaken = groups.find(el => el.name === newName);
+
+    if (nameTaken && nameTaken.id !== params.id) {
+      setClientError('Name is already used by other group.');
+      return;
+    }
 
     const updatedGroups = groups.map(el =>
       el.id === '' + groupId ? { ...el, name: newName } : el,
@@ -179,9 +202,9 @@ export default function EditFlashCards({
       onSubmit={handleSubmit}
       className='max-w-5xl mx-auto flex flex-col bg-white rounded-md py-4 px-8 my-30 shadow-md'
     >
-      {actionError && (
+      {errorMessage && (
         <p className='text-red-600 text-sm text-center mb-4' role='alert'>
-          {actionError}
+          {errorMessage}
         </p>
       )}
 
@@ -207,11 +230,11 @@ export default function EditFlashCards({
           <FlashCardFieldset
             key={flashCard.id}
             index={index}
-            id={flashCard.id}
+            id={'' + flashCard.id}
             answer={flashCard.answer}
             question={flashCard.question}
             onChange={updateFlashCard}
-            onRemove={() => removeFlashCard(flashCard.id)}
+            onRemove={() => removeFlashCard('' + flashCard.id)}
           />
         ))}
 
