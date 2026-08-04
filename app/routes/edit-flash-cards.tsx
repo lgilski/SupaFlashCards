@@ -172,8 +172,6 @@ export default function EditFlashCards({
     const groups = getLocalGroups();
     const cards = getLocalCards();
 
-    console.log(cards);
-
     const nameTaken = groups.find(el => el.name === newName);
 
     if (nameTaken && nameTaken.id !== params.id) {
@@ -230,11 +228,11 @@ export default function EditFlashCards({
           <FlashCardFieldset
             key={flashCard.id}
             index={index}
-            id={'' + flashCard.id}
+            id={flashCard.id}
             answer={flashCard.answer}
             question={flashCard.question}
             onChange={updateFlashCard}
-            onRemove={() => removeFlashCard('' + flashCard.id)}
+            onRemove={() => removeFlashCard(flashCard.id)}
           />
         ))}
 

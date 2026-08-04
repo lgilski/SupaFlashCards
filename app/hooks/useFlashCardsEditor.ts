@@ -15,12 +15,8 @@ export function useFlashCardsEditor(
       question: string;
       id: string | number;
     }[]
-  >(
-    initialCards.length
-      ? initialCards
-      : [{ id: 'new-0', question: '', answer: '' }],
-  );
-  const [deletedIds, setDeletedIds] = useState<string[]>([]);
+  >(initialCards ? initialCards : [{ id: 'new-0', question: '', answer: '' }]);
+  const [deletedIds, setDeletedIds] = useState<(string | number)[]>([]);
 
   // initial id is equal to those in db
   const initialIds = useRef(new Set(initialCards.map(card => card.id)));
@@ -35,7 +31,7 @@ export function useFlashCardsEditor(
   }
 
   function updateFlashCard(
-    id: string,
+    id: string | number,
     field: 'question' | 'answer',
     newValue: string,
   ) {
@@ -46,7 +42,9 @@ export function useFlashCardsEditor(
     );
   }
 
-  function removeFlashCard(id: string) {
+  function removeFlashCard(id: string | number) {
+    console.log(currentFlashCards, id);
+
     setCurrentFlashCards(prev => prev.filter(card => card.id !== id));
 
     // save only those cards to delete which are already in db

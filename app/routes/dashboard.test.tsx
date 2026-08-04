@@ -1,4 +1,4 @@
-import { test } from 'vitest';
+// import { test } from 'vitest';
 
-test.todo('loads card groups');
-test.todo('checks if the user is logged in and redirects to login page if not');
+// test.todo('user must be logged in, in other case redirect to the login page');
+// test.todo('shows card groups');

@@ -6,11 +6,15 @@ export function FlashCardFieldset({
   onChange,
   onRemove,
 }: {
-  id: string;
+  id: string | number;
   index: number;
   question: string;
   answer: string;
-  onChange: (id: string, field: 'question' | 'answer', value: string) => void;
+  onChange: (
+    id: string | number,
+    field: 'question' | 'answer',
+    value: string,
+  ) => void;
   onRemove: () => void;
 }) {
   return (
@@ -43,6 +47,7 @@ export function FlashCardFieldset({
         </div>
       </fieldset>
       <button
+        aria-label={`delete-flash-card-${id}`}
         className='text-red-500 rounded-md duration-150 p-1 hover:text-red-600 cursor-pointer w-min'
         type='button'
         onClick={onRemove}

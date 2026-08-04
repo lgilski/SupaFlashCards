@@ -156,11 +156,11 @@ export default function CreateFlashCards({
           <FlashCardFieldset
             key={flashCard.id}
             index={index}
-            id={'' + flashCard.id}
+            id={flashCard.id}
             answer={flashCard.answer}
             question={flashCard.question}
             onChange={updateFlashCard}
-            onRemove={() => removeFlashCard('' + flashCard.id)}
+            onRemove={() => removeFlashCard(flashCard.id)}
           />
         ))}
 
