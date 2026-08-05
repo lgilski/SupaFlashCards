@@ -29,6 +29,7 @@ function renderDashboard({
       loader() {
         return { data, userEmail };
       },
+      HydrateFallback: () => <div>Loading...</div>,
     },
   ]);
 
@@ -58,6 +59,7 @@ describe('Dashboard', () => {
         path: '/dashboard',
         middleware: [protectedMiddleware[0]] as never,
         Component: Dashboard,
+        HydrateFallback: () => <div>Loading...</div>,
       },
     ]);
 
@@ -128,6 +130,7 @@ describe('Dashboard', () => {
             userEmail: 'kasztan@test.com',
           };
         },
+        HydrateFallback: () => <div>Loading...</div>,
       },
     ]);
 

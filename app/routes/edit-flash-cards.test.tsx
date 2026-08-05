@@ -22,6 +22,7 @@ function renderFlashCards(
       loader() {
         return { cardsData: cards, isAnonymous: false };
       },
+      HydrateFallback: () => <div>Loading...</div>,
     },
   ]);
 
@@ -55,6 +56,7 @@ describe('EditFlashCards', () => {
         // declared) — safe to cast.
         middleware: [protectedMiddleware[0]] as never,
         Component: EditFlashCards,
+        HydrateFallback: () => <div>Loading...</div>,
       },
     ]);
 
@@ -102,12 +104,11 @@ describe('EditFlashCards', () => {
   });
 
   test('can delete flashcards', async () => {
+    const user = userEvent.setup();
     renderFlashCards([
       { id: '1', question: 'Q 1', answer: 'A 1' },
       { id: '2', question: 'Q 2', answer: 'A 2' },
     ]);
-
-    const user = userEvent.setup();
 
     await user.click(await screen.findByLabelText('delete-flash-card-1'));
 

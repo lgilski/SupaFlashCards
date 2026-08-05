@@ -38,7 +38,7 @@ export async function action({ request }: Route.ActionArgs) {
     const ids = new Set();
 
     for (const key of formData.keys()) {
-      // Matching names to the question-number or answer-number cnovention. If it matches that then the key gets returned but with additional stuff
+      // Matching names to the question-number or answer-number convention. If it matches that then the key gets returned but with additional stuff
       const match = key.match(/^(question|answer)-(\d+)$/);
 
       // on index 2 there is a number at the end of question-number

@@ -22,6 +22,7 @@ function renderFlashCards(cards: { question: string; answer: string }[]) {
       loader() {
         return { data: cards, groupName: 'Science', isAnonymous: false };
       },
+      HydrateFallback: () => <div>Loading...</div>,
     },
   ]);
 
@@ -55,6 +56,7 @@ describe('FlashCards', () => {
         // declared) — safe to cast.
         middleware: [protectedMiddleware[0]] as never,
         Component: FlashCards,
+        HydrateFallback: () => <div>Loading...</div>,
       },
     ]);
 

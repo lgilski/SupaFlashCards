@@ -21,6 +21,7 @@ function renderCreateFlashCards() {
       loader() {
         return { isAnonymous: false };
       },
+      HydrateFallback: () => <div>Loading...</div>,
     },
   ]);
 
@@ -50,6 +51,7 @@ describe('Test create flash cards', () => {
         path: '/flash-cards/create',
         middleware: [protectedMiddleware[0]] as never,
         Component: CreateFlashCards,
+        HydrateFallback: () => <div>Loading...</div>,
       },
     ]);
 
