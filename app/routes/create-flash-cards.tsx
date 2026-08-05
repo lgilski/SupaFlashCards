@@ -12,6 +12,7 @@ import {
   saveLocalGroups,
 } from '~/utils/localFlashCards';
 import { useFlashCardsEditor } from '~/hooks/useFlashCardsEditor';
+import { parseFlashCardsFromFormData } from '~/utils/parseFlashCardsFromFormData';
 
 export async function loader({ context }: Route.LoaderArgs) {
   const user = context.get(userContext);
@@ -35,21 +36,11 @@ export async function action({ request }: Route.ActionArgs) {
       return data({ error: newGroupError.message });
     }
 
-    const ids = new Set();
+    const { toInsert } = parseFlashCardsFromFormData(formData);
 
-    for (const key of formData.keys()) {
-      // Matching names to the question-number or answer-number convention. If it matches that then the key gets returned but with additional stuff
-      const match = key.match(/^(question|answer)-(\d+)$/);
-
-      // on index 2 there is a number at the end of question-number
-      if (match) ids.add(match[2]);
-    }
-
-    // Then we get the full data of those elements by id that we added to the set earlier
-    const flashcards = [...ids].map(id => ({
-      group_id: newGroupData!.id,
-      question: formData.get(`question-${id}`) as string,
-      answer: formData.get(`answer-${id}`) as string,
+    const flashcards = toInsert.map(el => ({
+      ...el,
+      group_id: newGroupData.id,
     }));
 
     const { error: insertError } = await supabase
@@ -59,7 +50,6 @@ export async function action({ request }: Route.ActionArgs) {
     if (insertError) {
       return data({ error: insertError.message });
     }
-
     return redirect('/flash-cards/' + newGroupData!.id);
   } catch (error) {
     throw data(getErrorMessage(error), { status: 500 });

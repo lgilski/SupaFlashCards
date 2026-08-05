@@ -8,7 +8,6 @@ export async function loader({ request }: Route.LoaderArgs) {
   const { data: userResponse, error } = await supabase.auth.getUser();
 
   if (error && error.message !== 'Auth session missing!') {
-    console.log(error.message);
     return { error: error.message };
   }
 

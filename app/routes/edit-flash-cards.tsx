@@ -150,7 +150,7 @@ export default function EditFlashCards({
     const groups = getLocalGroups();
     const cards = getLocalCards();
 
-    const updatedGroups = groups.filter((el: any) => el.id !== groupId);
+    const updatedGroups = groups.filter(el => el.id !== groupId);
     // Get rid of all the cards that are assing to the group
     delete cards[groupId!];
 
