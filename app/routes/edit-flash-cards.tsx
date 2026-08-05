@@ -110,6 +110,8 @@ export async function action({ params, request }: Route.ActionArgs) {
   return redirect(`/flash-cards/${groupId}`);
 }
 
+// TODO: fix the submitting state, so it is shown on correct buttons (submit and delete)
+
 export default function EditFlashCards({
   loaderData,
   actionData,

@@ -100,16 +100,7 @@ export default function CreateFlashCards({
 
     const groupId = crypto.randomUUID();
 
-    const ids = new Set<string>();
-    for (const key of formData.keys()) {
-      const match = key.match(/^(question|answer)-(\d+)$/);
-      if (match) ids.add(match[2]);
-    }
-
-    const flashcards = [...ids].map(id => ({
-      question: formData.get(`question-${id}`) as string,
-      answer: formData.get(`answer-${id}`) as string,
-    }));
+    const { toInsert: flashcards } = parseFlashCardsFromFormData(formData);
 
     groups.push({ id: groupId, name });
     cards[groupId] = flashcards;
