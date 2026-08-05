@@ -1,88 +1,104 @@
-// import { render, screen } from '@testing-library/react';
-// import { describe, expect, test } from 'vitest';
-// import CreateFlashCards from './create-flash-cards';
-// import {
-//   createMemoryRouter,
-//   createRoutesStub,
-//   RouterProvider,
-// } from 'react-router';
-// import userEvent from '@testing-library/user-event';
+import { render, screen } from '@testing-library/react';
+import { beforeEach, describe, expect, test, vi } from 'vitest';
+import CreateFlashCards from './create-flash-cards';
+import { createRoutesStub } from 'react-router';
+import userEvent from '@testing-library/user-event';
+import { getServerClient } from '~/utils/supabase.server';
+import { middleware as protectedMiddleware } from '~/layouts/protected';
 
-// // usuwanie kart, wpisywanie danych, dane do action są poprawne, jest przekierowanie do nowej strony, pojawiają się nowe pola
+vi.mock('~/utils/supabase.server.ts', () => ({
+  getServerClient: vi.fn(),
+}));
 
-// // Jest to potrzebne, bo Form jest w tym komponencie
-// // Żeby to działało jest potrzebny kontekst routera
+const mockedGetServerClient = vi.mocked(getServerClient);
 
-// // Musi być tego typu funkcja gdy: jest form, loader/action, i zachowanie po submicie
-// function renderCreateFlashCards() {
-//   // // createMemoryRouter tworzy obiekt routera i daje potrzebny kontekst (route, nawigacja i kontekst dla form)
-//   // const router = createMemoryRouter([
-//   //   {
-//   //     // Tutaj tworzy się fakeowe routing - tutaj mówimy, że jest tylko jedna ścieżka.
-//   //     // Gdyby test zależał od innych ścieżek, wpisałoby się tutaj inne ścieżki
-//   //     path: '/',
-//   //     // A to jest przykład przy nested strukturze
-//   //     // children: [{ path: ':id', element: <SomeComponent /> }],
-//   //     element: <CreateFlashCards />,
-//   //   },
-//   // ]);
+// usuwanie kart, wpisywanie danych, dane do action są poprawne, jest przekierowanie do nowej strony, pojawiają się nowe pola
+function renderCreateFlashCards() {
+  const Stub = createRoutesStub([
+    {
+      path: '/flash-cards/create',
+      Component: CreateFlashCards,
+      loader() {
+        return { isAnonymous: false };
+      },
+    },
+  ]);
 
-//   // // To łączy to co stworzył createMemoryRouter z drzewem renderu komponentu
-//   // return render(<RouterProvider router={router} />);
+  render(<Stub initialEntries={['/flash-cards/create']} />);
+}
 
-//   const Stub = createRoutesStub([
-//     {
-//       path: '/',
-//       Component: CreateFlashCards,
-//       loader() {
-//         return { isAnonymous: false };
-//       },
-//     },
-//   ]);
+describe('Test create flash cards', () => {
+  beforeEach(() => {
+    vi.resetAllMocks();
+  });
 
-//   render(<Stub initialEntries={['/']} />);
+  test('user must be logged in, in other case redirect to the login page', async () => {
+    mockedGetServerClient.mockReturnValue({
+      supabase: {
+        auth: {
+          getUser: vi
+            .fn()
+            .mockResolvedValue({ data: { user: null }, error: null }),
+        },
+      },
+      headers: new Headers(),
+    } as never);
 
-//   expect(screen.getByText('FlashCards')).toBeInTheDocument();
-// }
+    const Stub = createRoutesStub([
+      { path: '/login', Component: () => <div>Login page</div> },
+      {
+        path: '/flash-cards/create',
+        middleware: [protectedMiddleware[0]] as never,
+        Component: CreateFlashCards,
+      },
+    ]);
 
-// describe('Test create flash cards', () => {
-//   test.todo(
-//     'user must be logged in to see this page, in other case redirect to login page',
-//   );
-//   test('renders a group name input', () => {
-//     renderCreateFlashCards();
+    render(<Stub initialEntries={['/flash-cards/create']} />);
 
-//     expect(screen.getByLabelText('Group name')).toBeInTheDocument();
-//   });
+    expect(await screen.findByText('Login page')).toBeInTheDocument();
+  });
+  test('renders a group name input', async () => {
+    renderCreateFlashCards();
 
-//   test('creates initial empty flash card', () => {
-//     renderCreateFlashCards();
+    expect(await screen.findByLabelText('Group name')).toBeInTheDocument();
+  });
 
-//     expect(screen.getByText('Flash card number 1')).toBeInTheDocument();
-//   });
+  test('can add flash cards', async () => {
+    const user = userEvent.setup();
+    renderCreateFlashCards();
 
-//   test('can add flash cards', async () => {
-//     const user = userEvent.setup();
-//     renderCreateFlashCards();
+    await user.click(
+      await screen.findByRole('button', { name: 'Add flash card' }),
+    );
 
-//     await user.click(screen.getByRole('button', { name: 'Add flash card' }));
+    expect(await screen.findByText('Flash card number 1')).toBeInTheDocument();
+  });
 
-//     expect(screen.getByText('Flash card number 2')).toBeInTheDocument();
-//   });
+  test('can remove flash cards', async () => {
+    const user = userEvent.setup();
+    renderCreateFlashCards();
+    await user.click(
+      await screen.findByRole('button', { name: 'Add flash card' }),
+    );
 
-//   test.todo('can remove flash cards', async () => {
-//     const user = userEvent.setup();
-//     renderCreateFlashCards();
+    await user.click(await screen.findByLabelText('delete-flash-card-new-1'));
 
-//     await user.click(
-//       screen.getAllByRole('button', { name: 'Remove flash card' })[0],
-//     );
+    // getBy when element exists, queryBy when element might not exist
+    expect(screen.queryByText('Flash card number 1')).not.toBeInTheDocument();
+  });
+  test('can type in question and answer fields', async () => {
+    const user = userEvent.setup();
+    renderCreateFlashCards();
 
-//     // getBy gdy istnieje, queryBy gdy może nie istnieć
-//     expect(screen.queryByText('Flash card number 1')).not.toBeInTheDocument();
-//   });
-//   test.todo('can type in question and nsawer fields');
-//   test.todo('card name must be filled, throw error if not');
-//   test.todo('group name must be uniqe');
-//   test.todo('redirects to the dashboard after creating the new group');
-// });
+    await user.click(await screen.findByText('Add flash card'));
+
+    const questionField = await screen.findByLabelText('question-new-1');
+    const answerField = await screen.findByLabelText('answer-new-1');
+
+    await user.type(questionField, 'Question');
+    await user.type(answerField, 'Answer');
+
+    expect(questionField).toHaveValue('Question');
+    expect(answerField).toHaveValue('Answer');
+  });
+});

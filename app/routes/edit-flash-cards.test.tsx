@@ -100,6 +100,7 @@ describe('EditFlashCards', () => {
       await screen.findByDisplayValue('This is test answer'),
     ).toBeInTheDocument();
   });
+
   test('can delete flashcards', async () => {
     renderFlashCards([
       { id: '1', question: 'Q 1', answer: 'A 1' },
@@ -112,5 +113,17 @@ describe('EditFlashCards', () => {
 
     expect(screen.queryByDisplayValue('Q 1')).not.toBeInTheDocument();
   });
-  test.todo('deletes whole group and redirects to dashboard');
+
+  test('can add flashcards', async () => {
+    renderFlashCards([
+      { id: '1', question: 'Q 1', answer: 'A 1' },
+      { id: '2', question: 'Q 2', answer: 'A 2' },
+    ]);
+
+    const user = userEvent.setup();
+
+    await user.click(await screen.findByText('Add flash card'));
+
+    expect(await screen.findByText('Flash card number 3')).toBeInTheDocument();
+  });
 });

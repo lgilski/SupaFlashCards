@@ -28,6 +28,7 @@ export function FlashCardFieldset({
               className='bg-blue-grey-050 rounded-md px-2 py-1 inset-shadow-sm w-full'
               name={`question-${id}`}
               id={`question-${id}`}
+              aria-label={`question-${id}`}
               value={question}
               autoComplete='off'
               onChange={e => onChange(id, 'question', e.currentTarget.value)}
@@ -39,6 +40,7 @@ export function FlashCardFieldset({
               className='bg-blue-grey-050 rounded-md px-2 py-1 inset-shadow-sm w-full'
               name={`answer-${id}`}
               id={`answer-${id}`}
+              aria-label={`answer-${id}`}
               value={answer}
               autoComplete='off'
               onChange={e => onChange(id, 'answer', e.currentTarget.value)}

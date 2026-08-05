@@ -41,7 +41,7 @@ export function HydrateFallback() {
   return <Spinner />;
 }
 
-export default function Home({ loaderData }: Route.ComponentProps) {
+export default function Dashboard({ loaderData }: Route.ComponentProps) {
   const { data: groups, userEmail } = loaderData;
 
   return (
