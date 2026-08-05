@@ -7,24 +7,18 @@ export async function loader({ request }: Route.LoaderArgs) {
   const { supabase } = getServerClient(request);
   const { data: userResponse, error } = await supabase.auth.getUser();
 
-  if (error) {
+  if (error && error.message !== 'Auth session missing!') {
+    console.log(error.message);
     return { error: error.message };
-  }
-
-  if (userResponse?.user) {
-    throw redirect('/dashboard');
   }
 
   return null;
 }
-
 export async function action({ request }: Route.ActionArgs) {
   const { supabase, headers } = getServerClient(request);
-
   const formData = await request.formData();
   const email = formData.get('email') as string;
   const password = formData.get('password') as string;
-
   const { data: signUpData, error } = await supabase.auth.signUp({
     email,
     password,
