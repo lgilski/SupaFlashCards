@@ -1,10 +1,10 @@
 import { Form } from 'react-router';
 
-export default function EmptyMessage() {
+export default function EmptyMessage({ groupName }: { groupName: string }) {
   return (
     <section className='max-w-3xl mx-auto flex flex-col items-center bg-white p-4 my-16 shadow-md h-80 justify-center'>
       <h2 className='text-3xl font-semibold text-teal-900'>
-        Flash cards are missing
+        Flash cards for '{groupName}' are missing
       </h2>
       <p>Can you find them?</p>
       <Form action='edit'>

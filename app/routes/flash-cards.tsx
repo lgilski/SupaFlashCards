@@ -129,7 +129,7 @@ export default function FlashCards({ loaderData }: Route.ComponentProps) {
   }
 
   if (cardsToDisplay.length < 1) {
-    return <EmptyMessage />;
+    return <EmptyMessage groupName={groupName} />;
   }
 
   if (currentCard === cardsToDisplay.length) {
