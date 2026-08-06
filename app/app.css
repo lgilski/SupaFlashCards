@@ -70,6 +70,10 @@
   --color-yellow-900: #513c06;
 }
 
+html {
+  position: relative;
+}
+
 html,
 body {
   box-sizing: border-box;

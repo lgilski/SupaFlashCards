@@ -151,7 +151,7 @@ export default function CreateFlashCards({
             type='button'
             onClick={addFlashCard}
           >
-            Add flash card
+            Add
           </button>
           <button
             className='text-lg font-medium text-teal-050 bg-teal-500 px-4 py-2 rounded-md cursor-pointer duration-150 hover:bg-teal-400'

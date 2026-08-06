@@ -18,10 +18,10 @@ export function FlashCardFieldset({
   onRemove: () => void;
 }) {
   return (
-    <div className='flex justify-between items-end gap-32'>
+    <div className='flex justify-between items-end gap-32 max-md:gap-4 max-md:flex-col'>
       <fieldset className='w-full'>
         <legend>Flash card number {index + 1}</legend>
-        <div className='flex gap-4'>
+        <div className='flex gap-4 max-md:flex-col'>
           <div className='flex flex-col w-full'>
             <label htmlFor={`question-${id}`}>Question</label>
             <input

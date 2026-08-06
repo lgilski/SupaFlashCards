@@ -52,7 +52,7 @@ export default function Dashboard({ loaderData }: Route.ComponentProps) {
       {/* Add graphics for each group/group?? */}
       {/* min-h-155 */}
       <div
-        className={` bg-white rounded-md py-4 px-8 my-4 shadow-md min-h-80 ${groups && groups.length < 1 ? 'flex flex-col items-center justify-center' : 'grid grid-cols-3 gap-8 '}`}
+        className={` bg-white rounded-md py-4 px-8 my-4 shadow-md min-h-80 ${groups && groups.length < 1 ? 'flex flex-col items-center justify-center' : 'grid grid-cols-3 gap-8 max-lg:grid-cols-2 max-md:grid-cols-1'}`}
       >
         {groups && groups.length < 1 && (
           <>

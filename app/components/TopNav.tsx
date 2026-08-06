@@ -33,7 +33,7 @@ export default function TopNav({
             )}
           </div>
           <button
-            className='md:hidden'
+            className='md:hidden z-20'
             onClick={() => setShowMobileNav(prevState => !prevState)}
           >
             {!showMobileNav ? (
@@ -66,6 +66,27 @@ export default function TopNav({
           </button>
         </>
       )}
+      <div
+        //                                 /90 is opacity !!!
+        className={`fixed inset-0 z-10 bg-teal-200/90 transition-opacity md:hidden ${
+          showMobileNav
+            ? 'pointer-events-auto flex flex-col gap-2 items-center justify-center'
+            : 'pointer-events-none opacity-0 hidden'
+        }`}
+      >
+        {user ? (
+          <>
+            <Link to={'/dashboard'}>Go to dashboard</Link>
+            <Link to={'/flash-cards/create'}>Create flash cards</Link>
+            <Link to={'/logout'}>Log out</Link>
+          </>
+        ) : (
+          <>
+            <Link to={'/login'}>Log in</Link>
+            <Link to={'/signup'}>Sign up</Link>
+          </>
+        )}
+      </div>
     </nav>
   );
 }
