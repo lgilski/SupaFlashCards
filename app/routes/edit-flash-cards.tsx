@@ -198,65 +198,67 @@ export default function EditFlashCards({
   }
 
   return (
-    <Form
-      method='post'
-      onSubmit={handleSubmit}
-      className='max-w-5xl mx-auto flex flex-col bg-white rounded-md py-4 px-8 my-30 shadow-md'
-    >
-      {errorMessage && (
-        <p className='text-red-600 text-sm text-center mb-4' role='alert'>
-          {errorMessage}
-        </p>
-      )}
+    <section className='max-w-5xl mx-auto px-4'>
+      <Form
+        method='post'
+        onSubmit={handleSubmit}
+        className='flex flex-col bg-white rounded-md py-4 px-8 my-30 shadow-md'
+      >
+        {errorMessage && (
+          <p className='text-red-600 text-sm text-center mb-4' role='alert'>
+            {errorMessage}
+          </p>
+        )}
 
-      <div className='inline-flex flex-col'>
-        <label htmlFor='name'>Group name</label>
-        <input
-          className='bg-blue-grey-050 rounded-md px-2 py-1 inset-shadow-sm'
-          id='name'
-          name='name'
-          type='text'
-          autoComplete='off'
-          defaultValue={loaderData.groupName}
-        />
-      </div>
-
-      {/* Those inputs are neccessary so the cards to delete can get to the action to delete them */}
-      {deletedIds.map(id => (
-        <input key={id} type='hidden' name='deletedIds' value={id} />
-      ))}
-
-      <div className='flex flex-col gap-4 mt-4'>
-        {currentFlashCards.map((flashCard, index) => (
-          <FlashCardFieldset
-            key={flashCard.id}
-            index={index}
-            id={flashCard.id}
-            answer={flashCard.answer}
-            question={flashCard.question}
-            onChange={updateFlashCard}
-            onRemove={() => removeFlashCard(flashCard.id)}
+        <div className='inline-flex flex-col'>
+          <label htmlFor='name'>Group name</label>
+          <input
+            className='bg-blue-grey-050 rounded-md px-2 py-1 inset-shadow-sm'
+            id='name'
+            name='name'
+            type='text'
+            autoComplete='off'
+            defaultValue={loaderData.groupName}
           />
+        </div>
+
+        {/* Those inputs are neccessary so the cards to delete can get to the action to delete them */}
+        {deletedIds.map(id => (
+          <input key={id} type='hidden' name='deletedIds' value={id} />
         ))}
 
-        <div className='flex gap-4 mt-4'>
-          <Button color='tealLite' type='button' onClick={addFlashCard}>
-            Add
-          </Button>
-          <Button color='tealDark' type='submit'>
-            {isSubmitting ? 'Submitting...' : 'Submit'}
-          </Button>
-          <Button
-            color='redDark'
-            type='submit'
-            name='delete'
-            value='delete-group'
-            onClick={handleDeleteGroup}
-          >
-            Delete
-          </Button>
+        <div className='flex flex-col gap-4 mt-4'>
+          {currentFlashCards.map((flashCard, index) => (
+            <FlashCardFieldset
+              key={flashCard.id}
+              index={index}
+              id={flashCard.id}
+              answer={flashCard.answer}
+              question={flashCard.question}
+              onChange={updateFlashCard}
+              onRemove={() => removeFlashCard(flashCard.id)}
+            />
+          ))}
+
+          <div className='flex gap-4 mt-4'>
+            <Button color='tealLite' type='button' onClick={addFlashCard}>
+              Add
+            </Button>
+            <Button color='tealDark' type='submit'>
+              {isSubmitting ? 'Submitting...' : 'Submit'}
+            </Button>
+            <Button
+              color='redDark'
+              type='submit'
+              name='delete'
+              value='delete-group'
+              onClick={handleDeleteGroup}
+            >
+              Delete
+            </Button>
+          </div>
         </div>
-      </div>
-    </Form>
+      </Form>
+    </section>
   );
 }

@@ -18,7 +18,7 @@ export default function Layout({ loaderData }: Route.ComponentProps) {
   return (
     <main className='flex min-h-screen flex-col justify-start'>
       <TopNav user={user} />
-      <div className='h-full max-md:px-4'>
+      <div className='h-full'>
         <Outlet />
       </div>
       <Footer />

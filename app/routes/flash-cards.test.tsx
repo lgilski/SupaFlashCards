@@ -111,7 +111,7 @@ describe('FlashCards', () => {
       { question: 'Question 2', answer: 'Answer 2' },
     ]);
 
-    await user.click(await screen.findByRole('button', { name: 'To repeat' }));
+    await user.click(await screen.findByRole('button', { name: 'Repeat' }));
     await user.click(await screen.findByRole('button', { name: 'I know' }));
 
     expect(

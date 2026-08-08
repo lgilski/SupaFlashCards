@@ -8,6 +8,7 @@ import getErrorMessage from '~/utils/getErrorMessage';
 import { shuffle } from '~/utils/shuffle';
 import EmptyMessage from '~/components/flash-cards/EmptyMessage';
 import RestartFlashCards from '~/components/flash-cards/RestartFlashCards';
+import Button from '~/components/Button';
 
 export async function loader({ params, request, context }: Route.LoaderArgs) {
   const user = context.get(userContext);
@@ -190,18 +191,16 @@ export default function FlashCards({ loaderData }: Route.ComponentProps) {
         </svg>
       </div>
       <div className='grid grid-cols-2 gap-8'>
-        <button
-          className='text-lg bg-red-500 text-red-050 px-4 py-2 rounded-md cursor-pointer hover:bg-red-400 duration-150'
+        <Button
+          color='redDark'
+
           onClick={addToRepeat}
         >
-          To repeat
-        </button>
-        <button
-          className='text-lg bg-teal-500 text-teal-050 px-4 py-2 rounded-md cursor-pointer hover:bg-teal-400 duration-150'
-          onClick={nextQuestion}
-        >
+          Repeat
+        </Button>
+        <Button color='tealDark' onClick={nextQuestion}>
           I know
-        </button>
+        </Button>
       </div>
     </section>
   );

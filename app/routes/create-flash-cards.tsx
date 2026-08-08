@@ -113,48 +113,50 @@ export default function CreateFlashCards({
   }
 
   return (
-    <Form
-      method='post'
-      onSubmit={handleSubmit}
-      className='max-w-5xl mx-auto flex flex-col bg-white rounded-md py-4 px-8 my-30 shadow-md'
-    >
-      {errorMessage && (
-        <p className='text-red-600 text-sm text-center mb-2' role='alert'>
-          {errorMessage}
-        </p>
-      )}
-      <div className='inline-flex flex-col'>
-        <label htmlFor='name'>Group name</label>
-        <input
-          className='bg-blue-grey-050 rounded-md px-2 py-1 inset-shadow-sm'
-          id='name'
-          name='name'
-          type='text'
-          autoComplete='off'
-        />
-      </div>
-      <div className='flex flex-col gap-4 mt-4'>
-        {currentFlashCards.map((flashCard, index) => (
-          <FlashCardFieldset
-            key={flashCard.id}
-            index={index}
-            id={flashCard.id}
-            answer={flashCard.answer}
-            question={flashCard.question}
-            onChange={updateFlashCard}
-            onRemove={() => removeFlashCard(flashCard.id)}
+    <section className='max-w-5xl mx-auto px-4'>
+      <Form
+        method='post'
+        onSubmit={handleSubmit}
+        className='flex flex-col bg-white rounded-md py-4 px-8 my-30 shadow-md'
+      >
+        {errorMessage && (
+          <p className='text-red-600 text-sm text-center mb-2' role='alert'>
+            {errorMessage}
+          </p>
+        )}
+        <div className='inline-flex flex-col'>
+          <label htmlFor='name'>Group name</label>
+          <input
+            className='bg-blue-grey-050 rounded-md px-2 py-1 inset-shadow-sm'
+            id='name'
+            name='name'
+            type='text'
+            autoComplete='off'
           />
-        ))}
-
-        <div className='flex gap-4 mt-4'>
-          <Button color='tealLite' onClick={addFlashCard}>
-            Add
-          </Button>
-          <Button type='submit' color='tealDark'>
-            Submit
-          </Button>
         </div>
-      </div>
-    </Form>
+        <div className='flex flex-col gap-4 mt-4'>
+          {currentFlashCards.map((flashCard, index) => (
+            <FlashCardFieldset
+              key={flashCard.id}
+              index={index}
+              id={flashCard.id}
+              answer={flashCard.answer}
+              question={flashCard.question}
+              onChange={updateFlashCard}
+              onRemove={() => removeFlashCard(flashCard.id)}
+            />
+          ))}
+
+          <div className='flex gap-4 mt-4'>
+            <Button color='tealLite' onClick={addFlashCard}>
+              Add
+            </Button>
+            <Button type='submit' color='tealDark'>
+              Submit
+            </Button>
+          </div>
+        </div>
+      </Form>
+    </section>
   );
 }

@@ -45,7 +45,7 @@ export default function Dashboard({ loaderData }: Route.ComponentProps) {
   const { data: groups, userEmail } = loaderData;
 
   return (
-    <section className='max-w-7xl mx-auto pt-16'>
+    <section className='max-w-7xl mx-auto pt-16 px-4'>
       <h3 className='text-center text-xl'>
         Welcome {userEmail ? userEmail : 'Guest'}
       </h3>
