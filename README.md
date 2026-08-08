@@ -1,28 +1,31 @@
 # SupaFlashCards Learning Project
 
-This is a learning project built with React Router and TypeScript, created to practice building a modern flashcard application and improve my web development skills.
+This is a learning project built with React Router, TypeScript, Tailwind CSS, and Supabase, created to practice building a modern full-stack flashcard application.
 
 ## About
 
-The app is designed to help explore web development concepts such as:
+SupaFlashCards is a responsive study-focused web app that allows users to create, edit, and review flashcard groups for active learning. The project was built for learning purposes to explore frontend, routing, authentication, API integration, and testing workflows.
+
+The project focuses on concepts such as:
 
 - React and React Router for the front-end experience
-- Supabase for authentication and data storage
-- TypeScript for safer and more maintainable code
-- Vite for fast development and build tooling
+- Supabase for authentication and database storage
+- TypeScript for a more maintainable codebase
+- Vite for development and build tooling
+- Responsive UI patterns for screen adaptation
 - Testing with Vitest and Testing Library
 - Tailwind CSS for styling
 
 ## Features
 
-The project demonstrates several flashcard app features, including:
+The current version of the project demonstrates several learning and application features, including:
 
-- Creating and managing flashcard groups
-- Adding questions and answers to each set
-- Studying flashcards in an interactive learning flow
-- Marking cards for repetition and restarting study sessions
-- User authentication with Supabase
-- Anonymous usage with local storage for quick testing
+- Responsive dashboard for browsing flashcard groups
+- Flashcard creation and editing workflows
+- Study mode with question/answer reveal and repeat flow
+- Card repetition logic for review sessions
+- Login, signup, logout, and anonymous access options
+- Local storage support for anonymous user sessions
 
 ## Tech Stack
 
