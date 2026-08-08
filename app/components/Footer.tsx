@@ -5,7 +5,7 @@ export default function Footer() {
     <footer className='mt-auto border-t border-blue-grey-200 py-4 max-md:px-4'>
       <div className='text-center flex gap-2 justify-center'>
         <p>This app was made by lgilski for learning purposes.</p>
-        <Link to='https://github.com/lgilski/MazurShop'>
+        <Link to='https://github.com/lgilski/SupaFlashCards'>
           <svg
             width='23'
             height='23'

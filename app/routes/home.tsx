@@ -34,10 +34,15 @@ export default function Home() {
             Here you can create "supa" flash cards which will help you study
           </p>
           <div className='flex gap-4 justify-center mt-6'>
-            <ButtonLink to={'/login'} color='tealDark'>
+            <ButtonLink color='tealDark' to={'/login'}>
               Get started
             </ButtonLink>
-            <Button color='white'>Learn more</Button>
+            <ButtonLink
+              color='white'
+              to='https://github.com/lgilski/SupaFlashCards'
+            >
+              Learn more
+            </ButtonLink>
           </div>
         </div>
       </section>
