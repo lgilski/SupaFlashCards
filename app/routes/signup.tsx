@@ -2,6 +2,7 @@ import { data, Form, redirect, useNavigation } from 'react-router';
 import type { Route } from './+types/signup';
 import { getServerClient } from '~/utils/supabase.server';
 import { useState, type SubmitEvent } from 'react';
+import Button from '~/components/Button';
 
 export async function loader({ request }: Route.LoaderArgs) {
   const { supabase } = getServerClient(request);
@@ -135,14 +136,14 @@ export default function SignUp({
             placeholder='Repeat password'
           />
         </fieldset>
-        <button
-          className='text-lg font-medium text-teal-050
-           bg-teal-600 px-4 py-2 rounded-md mt-2 cursor-pointer duration-150 hover:bg-teal-500'
+        <Button
+          className='mt-2'
+          color='tealDark'
           type='submit'
           disabled={isSubmitting}
         >
           {isSubmitting ? 'Submiting...' : 'Submit'}
-        </button>
+        </Button>
       </Form>
     </div>
   );

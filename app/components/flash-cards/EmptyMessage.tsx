@@ -1,4 +1,5 @@
 import { Form } from 'react-router';
+import Button from '../Button';
 
 export default function EmptyMessage({ groupName }: { groupName: string }) {
   return (
@@ -8,12 +9,9 @@ export default function EmptyMessage({ groupName }: { groupName: string }) {
       </h2>
       <p>Can you find them?</p>
       <Form action='edit'>
-        <button
-          className='font-medium text-teal-050 bg-teal-500 px-2 py-1 rounded-md cursor-pointer duration-150 hover:bg-teal-400 mt-4'
-          type='submit'
-        >
+        <Button className='mt-4' size='sm' color='tealDark' type='submit'>
           Edit flash cards
-        </button>
+        </Button>
       </Form>
     </section>
   );

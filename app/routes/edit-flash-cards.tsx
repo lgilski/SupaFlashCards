@@ -20,6 +20,7 @@ import {
   saveLocalCards,
   saveLocalGroups,
 } from '~/utils/localFlashCards';
+import Button from '~/components/Button';
 
 export async function loader({ params, request, context }: Route.LoaderArgs) {
   const groupId = +params.id;
@@ -239,28 +240,21 @@ export default function EditFlashCards({
         ))}
 
         <div className='flex gap-4 mt-4'>
-          <button
-            className='text-lg font-medium text-teal-800 bg-teal-100 px-4 py-2 rounded-md cursor-pointer duration-150 hover:bg-teal-200'
-            type='button'
-            onClick={addFlashCard}
-          >
+          <Button color='tealLite' type='button' onClick={addFlashCard}>
             Add
-          </button>
-          <button
-            className='text-lg font-medium text-teal-050 bg-teal-500 px-4 py-2 rounded-md cursor-pointer duration-150 hover:bg-teal-400'
-            type='submit'
-          >
+          </Button>
+          <Button color='tealDark' type='submit'>
             {isSubmitting ? 'Submitting...' : 'Submit'}
-          </button>
-          <button
-            className='text-lg font-medium text-red-050 bg-red-600 px-4 py-2 rounded-md cursor-pointer duration-150 hover:bg-red-500'
+          </Button>
+          <Button
+            color='redDark'
             type='submit'
             name='delete'
             value='delete-group'
             onClick={handleDeleteGroup}
           >
             Delete
-          </button>
+          </Button>
         </div>
       </div>
     </Form>

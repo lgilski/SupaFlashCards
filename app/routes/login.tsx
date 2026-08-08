@@ -5,6 +5,7 @@ import { createBrowserClient } from '@supabase/ssr';
 import { useState, type SubmitEvent } from 'react';
 import type { Database } from '~/database.types';
 import getErrorMessage from '~/utils/getErrorMessage';
+import Button from '~/components/Button';
 
 export async function loader({ request }: Route.LoaderArgs) {
   const { supabase, headers } = getServerClient(request);
@@ -159,24 +160,20 @@ export default function Login({ loaderData }: Route.ComponentProps) {
             placeholder='Enter password'
           />
         </fieldset>
-        <button
-          className='text-lg font-medium text-teal-050
-           bg-teal-600 px-4 py-2 rounded-md mt-2 cursor-pointer duration-150 hover:bg-teal-500'
+        <Button
+          className='mt-2'
+          color='tealDark'
           type='submit'
           disabled={isSubmitting}
         >
           {isSubmitting ? 'Logging in...' : 'Submit'}
-        </button>
+        </Button>
       </Form>
       <p className='text-center my-2'>or</p>
       <Form className='flex flex-col' method='post' onSubmit={loginAnonymously}>
-        <button
-          className='text-lg font-medium text-blue-grey-800 bg-blue-grey-050 px-4 py-2 rounded-md cursor-pointer duration-150 hover:bg-blue-grey-100'
-          type='submit'
-          disabled={isSubmitting}
-        >
+        <Button color='white' type='submit' disabled={isSubmitting}>
           Log in anonymously
-        </button>
+        </Button>
       </Form>
     </div>
   );

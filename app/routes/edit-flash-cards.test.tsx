@@ -123,7 +123,7 @@ describe('EditFlashCards', () => {
 
     const user = userEvent.setup();
 
-    await user.click(await screen.findByText('Add flash card'));
+    await user.click(await screen.findByText('Add'));
 
     expect(await screen.findByText('Flash card number 3')).toBeInTheDocument();
   });

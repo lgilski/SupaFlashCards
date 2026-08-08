@@ -13,6 +13,7 @@ import {
 } from '~/utils/localFlashCards';
 import { useFlashCardsEditor } from '~/hooks/useFlashCardsEditor';
 import { parseFlashCardsFromFormData } from '~/utils/parseFlashCardsFromFormData';
+import Button from '~/components/Button';
 
 export async function loader({ context }: Route.LoaderArgs) {
   const user = context.get(userContext);
@@ -146,19 +147,12 @@ export default function CreateFlashCards({
         ))}
 
         <div className='flex gap-4 mt-4'>
-          <button
-            className='text-lg font-medium text-teal-800 bg-teal-100 px-4 py-2 rounded-md cursor-pointer duration-150 hover:bg-teal-200'
-            type='button'
-            onClick={addFlashCard}
-          >
+          <Button color='tealLite' onClick={addFlashCard}>
             Add
-          </button>
-          <button
-            className='text-lg font-medium text-teal-050 bg-teal-500 px-4 py-2 rounded-md cursor-pointer duration-150 hover:bg-teal-400'
-            type='submit'
-          >
+          </Button>
+          <Button type='submit' color='tealDark'>
             Submit
-          </button>
+          </Button>
         </div>
       </div>
     </Form>

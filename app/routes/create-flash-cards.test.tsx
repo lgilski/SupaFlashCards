@@ -65,13 +65,11 @@ describe('Test create flash cards', () => {
     expect(await screen.findByLabelText('Group name')).toBeInTheDocument();
   });
 
-  test('can add flash cards', async () => {
+  test('can Adds', async () => {
     const user = userEvent.setup();
     renderCreateFlashCards();
 
-    await user.click(
-      await screen.findByRole('button', { name: 'Add flash card' }),
-    );
+    await user.click(await screen.findByRole('button', { name: 'Add' }));
 
     expect(await screen.findByText('Flash card number 1')).toBeInTheDocument();
   });
@@ -79,9 +77,7 @@ describe('Test create flash cards', () => {
   test('can remove flash cards', async () => {
     const user = userEvent.setup();
     renderCreateFlashCards();
-    await user.click(
-      await screen.findByRole('button', { name: 'Add flash card' }),
-    );
+    await user.click(await screen.findByRole('button', { name: 'Add' }));
 
     await user.click(await screen.findByLabelText('delete-flash-card-new-1'));
 
@@ -92,7 +88,7 @@ describe('Test create flash cards', () => {
     const user = userEvent.setup();
     renderCreateFlashCards();
 
-    await user.click(await screen.findByText('Add flash card'));
+    await user.click(await screen.findByText('Add'));
 
     const questionField = await screen.findByLabelText('question-new-1');
     const answerField = await screen.findByLabelText('answer-new-1');

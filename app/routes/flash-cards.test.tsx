@@ -69,7 +69,7 @@ describe('FlashCards', () => {
     renderFlashCards([]);
 
     expect(
-      await screen.findByText('Flash cards are missing'),
+      await screen.findByText("Flash cards for 'Science' are missing"),
     ).toBeInTheDocument();
     expect(
       await screen.findByRole('button', { name: 'Edit flash cards' }),
