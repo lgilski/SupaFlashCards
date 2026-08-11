@@ -148,7 +148,7 @@ export default function CreateFlashCards({
           ))}
 
           <div className='flex gap-4 mt-4'>
-            <Button color='tealLite' onClick={addFlashCard}>
+            <Button type='button' color='tealLite' onClick={addFlashCard}>
               Add
             </Button>
             <Button type='submit' color='tealDark'>
