@@ -5,6 +5,10 @@ import { getServerClient } from '~/utils/supabase.server';
 
 export const middleware: Route.MiddlewareFunction[] = [
   async ({ request, context }, next) => {
+    const user = context.get(userContext);
+
+    if (user) return await next();
+
     const { supabase, headers } = getServerClient(request);
 
     const { data, error } = await supabase.auth.getUser();
