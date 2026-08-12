@@ -73,6 +73,7 @@ export default function TopNav({
             ? 'pointer-events-auto flex flex-col gap-2 items-center justify-center'
             : 'pointer-events-none opacity-0 hidden'
         }`}
+        onClick={() => setShowMobileNav(false)}
       >
         {user ? (
           <>
