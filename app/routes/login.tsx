@@ -1,6 +1,6 @@
 import { getServerClient } from '~/utils/supabase.server';
 import type { Route } from './+types/login';
-import { data, Form, redirect, useNavigate } from 'react-router';
+import { data, Form, Link, redirect, useNavigate } from 'react-router';
 import { createBrowserClient } from '@supabase/ssr';
 import { useState, type SubmitEvent } from 'react';
 import type { Database } from '~/database.types';
@@ -159,6 +159,9 @@ export default function Login({ loaderData }: Route.ComponentProps) {
             type='password'
             placeholder='Enter password'
           />
+          <Link className='text-right' to={'/forgot-password'}>
+            Forgot password?
+          </Link>
         </fieldset>
         <Button
           className='mt-2'
