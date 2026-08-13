@@ -7,10 +7,15 @@ export async function action({ request }: Route.ActionArgs) {
   const { supabase } = getServerClient(request);
   const formData = await request.formData();
   const email = formData.get('email') as string;
+  const origin = new URL(request.url).origin;
 
   await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: `${process.env.PUBLIC_SITE_URL}/update-password`,
+    redirectTo: `${origin}/update-password`,
   });
+
+  // await supabase.auth.resetPasswordForEmail(email, {
+  //   redirectTo: `${process.env.PUBLIC_SITE_URL}/update-password`,
+  // });
 
   return data({
     info: 'If an account exists for that email, a reset link has been sent.',
