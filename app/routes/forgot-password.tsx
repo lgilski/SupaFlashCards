@@ -13,6 +13,8 @@ export async function action({ request }: Route.ActionArgs) {
     redirectTo: `${origin}/update-password`,
   });
 
+  console.log('origin:', origin);
+
   // await supabase.auth.resetPasswordForEmail(email, {
   //   redirectTo: `${process.env.PUBLIC_SITE_URL}/update-password`,
   // });
