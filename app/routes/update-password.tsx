@@ -9,6 +9,8 @@ export async function loader({ request }: Route.LoaderArgs) {
 
   if (code) {
     const { error } = await supabase.auth.exchangeCodeForSession(code);
+
+    console.log('update-password error: ', error);
     if (error) {
       throw redirect('/login', { headers });
     }
