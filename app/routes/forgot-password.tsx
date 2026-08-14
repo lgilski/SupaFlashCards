@@ -4,7 +4,7 @@ import { getServerClient } from '~/utils/supabase.server';
 import { data, Form, useNavigation } from 'react-router';
 
 export async function action({ request }: Route.ActionArgs) {
-  const { supabase } = getServerClient(request);
+  const { supabase, headers } = getServerClient(request);
   const formData = await request.formData();
   const email = formData.get('email') as string;
   const origin = new URL(request.url).origin;
@@ -13,15 +13,12 @@ export async function action({ request }: Route.ActionArgs) {
     redirectTo: `${origin}/update-password`,
   });
 
-  console.log('origin:', origin);
-
-  // await supabase.auth.resetPasswordForEmail(email, {
-  //   redirectTo: `${process.env.PUBLIC_SITE_URL}/update-password`,
-  // });
-
-  return data({
-    info: 'If an account exists for that email, a reset link has been sent.',
-  });
+  return data(
+    {
+      info: 'If an account exists for that email, a reset link has been sent.',
+    },
+    { headers },
+  );
 }
 
 export default function ForgotPassword({ actionData }: Route.ComponentProps) {
