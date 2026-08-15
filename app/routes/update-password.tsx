@@ -34,16 +34,21 @@ export default function UpdatePassword({ loaderData }: Route.ComponentProps) {
       env.SUPABASE_PUBLISHABLE_KEY,
     );
 
-    supabase.auth.exchangeCodeForSession(code).then(({ error }) => {
-      if (error) {
-        setErrorMessage('This reset link is invalid or has expired.');
-        return;
-      }
-      setReady(true);
-    });
+    const { data: listener } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        if (
+          event === 'PASSWORD_RECOVERY' ||
+          (event === 'SIGNED_IN' && session)
+        ) {
+          setReady(true);
+        }
+      },
+    );
+
+    return () => listener.subscription.unsubscribe();
   }, [env.SUPABASE_URL, env.SUPABASE_PUBLISHABLE_KEY]);
 
-  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: React.SubmitEvent<HTMLFormElement>) {
     event.preventDefault();
     setErrorMessage('');
     setIsSubmitting(true);
